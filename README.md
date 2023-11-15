@@ -5,4 +5,4 @@ idf.py build
 idf.py flash
 idf.py monitor
 
- idf.py build flash monitor
+ idf.py -p /dev/ttyUSB0 build flash monitor
