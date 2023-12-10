@@ -1,4 +1,6 @@
 #pragma once
+// analog inputs
+#define ADC1_CH_0 ADC1_CHANNEL_5
 
 #include "driver/adc.h"
 
@@ -14,6 +16,7 @@ void xADC(void *arg)
     for (;;)
     {
         sensor_value = (float)adc1_get_raw(ADC1_CH_0) * 100 / 4095;
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);
 }

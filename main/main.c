@@ -1,3 +1,5 @@
+#define DEBUG 1
+
 #include "defines.h"
 
 #include <stdio.h>
@@ -20,6 +22,8 @@
 #include "adc.h"
 #include "wifi.h"
 
+#include "queue.h"
+
 static const char *TAG = "MAIN";
 
 void app_main(void)
@@ -32,20 +36,22 @@ void app_main(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-    // Register threads
-
-    if (pdTRUE != xTaskCreate(xGPIO, "Task GPIO", 2048, NULL, 0, NULL))
+    // Register tasks
+    if (pdTRUE != xTaskCreate(xLED, "Task LED", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL))
     {
-        ESP_LOGI(TAG, "error - nao foi possivel alocar Task GPIO.");
+        ESP_LOGI(TAG, "error - nao foi possivel alocar Task LED.");
         return;
     }
-    if (pdTRUE != xTaskCreate(xADC, "Task ADC", 2048, NULL, 0, NULL))
+    if (pdTRUE != xTaskCreate(xButton, "Task Button", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL))
+    {
+        ESP_LOGI(TAG, "error - nao foi possivel alocar Task Button.");
+        return;
+    }
+    if (pdTRUE != xTaskCreate(xADC, "Task ADC", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL))
     {
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task ADC.");
         return;
     }
 
-    wifi_event_group = xEventGroupCreate();
-    wifi_init_start();
-    xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_BIT, false, true, portMAX_DELAY);
+    configure_start_wifi();
 }
