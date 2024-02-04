@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .item0 { grid-area: logo; }
+        .item1 { grid-area: header; }
+        .item2 { grid-area: menu; }
+
+        .grid-container {
+            display: grid;
+            grid-template-areas:
+                'logo logo logo'
+                'header header header'
+                'menu menu menu'
+                'main main main';
+            gap: 1px;
+            background-color: #252525;
+            padding: 1px;
+        }
+
+        .grid-container > div {
+            background-color: rgba(255, 255, 255, 255);
+            text-align: center;
+        }
+
+        .led {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 10px;
+            display: inline-block;
+        }
+        .led-on {
+            background-color: #21c721;
+        }
+        .led-off {
+            background-color: #ff0000;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="grid-container">
+    <div class="item0"> <img src="https://www.sp.senai.br/images/senai.svg" alt="logo"> </div>
+    <div class="item1"> <h1>ESP32 - WEB Server</h1> </div>
+    <div class="item2">
+        <h2>GPIOs</h2>
+        <div class="led" id="led0"></div>
+        <button onclick="toggleLED('led0')">LED 1</button>
+        <div class="led" id="led1"></div>
+        <button onclick="toggleLED('led1')">LED 2</button>
+        <div class="led" id="led2"></div>
+        <button onclick="toggleLED('led2')">LED 3</button>
+        <div class="led" id="led3"></div>
+        <button onclick="toggleLED('led3')">LED 4</button>
+
+    </div>
+
+</div>
+
+
+<script>
+    function toggleLED(ledId) {
+        var led = document.getElementById(ledId);
+        if (led.classList.contains('led-on')) {
+            led.classList.remove('led-on');
+            led.classList.add('led-off');
+        } else {
+            led.classList.remove('led-off');
+            led.classList.add('led-on');
+        }
+    }
+</script>
+
+
+</body>
+</html>
+
+
