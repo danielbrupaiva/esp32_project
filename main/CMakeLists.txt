@@ -2,4 +2,5 @@
 idf_component_register(
                     SRCS "main.c"
                     INCLUDE_DIRS "."
-                    INCLUDE_DIRS "./include")
+                    INCLUDE_DIRS "./include"
+)

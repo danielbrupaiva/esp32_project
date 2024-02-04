@@ -1,7 +1,5 @@
 #define DEBUG 1
 
-#include "defines.h"
-
 #include <stdio.h>
 #include <string.h>
 // Log
@@ -22,10 +20,11 @@
 #include "adc.h"
 #include "wifi.h"
 
-#include "queue.h"
+static SemaphoreHandle_t xSemaphore1 = NULL;
+static SemaphoreHandle_t xSemaphore2 = NULL;
+static SemaphoreHandle_t xSemaphore3 = NULL;
 
 static const char *TAG = "MAIN";
-
 void app_main(void)
 {
     ESP_LOGI(TAG, "Start");
@@ -36,7 +35,8 @@ void app_main(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-    // Register tasks
+
+    /** Deploy tasks **/
     if (pdTRUE != xTaskCreate(xLED, "Task LED", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL))
     {
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task LED.");
@@ -47,11 +47,14 @@ void app_main(void)
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task Button.");
         return;
     }
+    /*
     if (pdTRUE != xTaskCreate(xADC, "Task ADC", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL))
     {
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task ADC.");
         return;
-    }
+    }*/
 
     configure_start_wifi();
+    
+    
 }

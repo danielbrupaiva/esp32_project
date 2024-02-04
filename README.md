@@ -1,5 +1,7 @@
 # ESP-IDF PROJECT
 
+[Link] https://docs.espressif.com/projects/esp-idf/en/v4.4.6/esp32/index.html
+
 ## Useful commnads
 
 $ get_idf
@@ -20,9 +22,13 @@ $ idf.py -p /dev/ttyUSB0 build flash monitor
 
 - Task sync.
 - InterProcess Comunication ("ping-pong")
-- Fix debounce at digital input
+
+- Study NVS usage
+- Implement Watchdog timer -> task monitor (queue)
 - Implement MQTT
+- Implement WebServer
+
 - Implement I2C connection
 - Implement UART connection
-- Implement WebServer
-- Convert to Zephyr RTOS
+
+- Convert to Zephyr RTOS ?

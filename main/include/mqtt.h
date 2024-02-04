@@ -7,6 +7,7 @@
 #include "mqtt_client.h"
 
 static EventGroupHandle_t mqtt_event_group;
+
 esp_mqtt_client_handle_t mqtt_client;
 static esp_err_t mqtt_event_handler_callback(esp_mqtt_event_handle_t event);
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data);
@@ -18,12 +19,13 @@ static void xMQTTPublish(void *arg)
     static const char *TAG = "MQTT PUBLISH: ";
     for (;;)
     {
+
     }
 }
 // MQTT
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 {
-    const char *TAG = "MQTT_HANDLER_CB";
+    static const char *TAG = "MQTT_HANDLER_CB";
 
     mqtt_client = event->client;
     int8_t msg_id;

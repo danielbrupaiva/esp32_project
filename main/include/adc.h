@@ -16,6 +16,7 @@ void xADC(void *arg)
     for (;;)
     {
         sensor_value = (float)adc1_get_raw(ADC1_CH_0) * 100 / 4095;
+        ESP_LOGI(TAG, "ADC value: %0.2f", sensor_value);
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);

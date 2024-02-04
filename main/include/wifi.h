@@ -1,13 +1,13 @@
 #pragma once
-#define HOME 1
-#ifdef HOME
-#define final
+
 #define WIFI_SSID "BRUG.2G"
 #define WIFI_PASS "*admin1101"
-#else
-#define WIFI_SSID "Pos_Sist_Emb"
-#define WIFI_PASS "LPFS2022"
-#endif
+//#define WIFI_SSID "Pos_Sist_Emb"
+//#define WIFI_PASS "LPFS2022"
+
+#define SERVER_IP "192.168.15.23"
+#define SERVER_PORT 80
+
 
 // Wifi
 #include "esp_wifi.h"
@@ -22,9 +22,11 @@
 #include "lwip/ip4_addr.h"
 
 // wifi
-
+// EventGroups
 static EventGroupHandle_t wifi_event_group;
 static int WIFI_CONNECTED_BIT = BIT0;
+static int MQTT_CONNECTED_BIT = BIT1;
+
 static void wifi_init_start(void);
 static void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 void configure_start_wifi(void);
@@ -32,7 +34,7 @@ void configure_start_wifi(void);
 /** initialization **/
 static void wifi_init_start(void)
 {
-    const char *TAG = "xWifi : Initializing";
+    static const char *TAG = "xWifi : Initializing";
     ESP_ERROR_CHECK(esp_netif_init());
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -73,7 +75,7 @@ static void wifi_init_start(void)
 /** WIFI event handler **/
 static void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
-    const char *TAG = "xWifi : Event Handler";
+    static const char *TAG = "xWifi : Event Handler";
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
         esp_wifi_connect();
@@ -96,7 +98,76 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t e
 /** Configure and start wifi connection **/
 void configure_start_wifi(void)
 {
+    /** Create event group to sync task **/
     wifi_event_group = xEventGroupCreate();
+    /** Start Wfi initialization **/
     wifi_init_start();
-    xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_BIT, false, true, portMAX_DELAY);
+    /** Wait connection stablish**/
+    xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_BIT, true, true, 10000 / portTICK_PERIOD_MS);
+}
+
+/**
+ * 1-Configura o ESP32 em modo Socket Client;
+ * 2-Conecta ao servidor TCP;
+ * 3-Envia string para o servidor;
+ * 4-Encerra a conexão socket com o servidor;
+ */
+static void socket_client(int count)
+{
+    static const char *TAG = "xWifi : socket_client";
+
+	int rc;
+	char str[20];
+
+	if (DEBUG)
+		ESP_LOGI(TAG, "socket_client...\n");
+
+	/**
+	 * Cria o socket TCP;
+	 */
+	int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	if (DEBUG)
+		ESP_LOGI(TAG, "socket: rc: %d", sock);
+
+	/**
+	 * Configura/Vincula o endereço IP e Port do Servidor (Bind);
+	 */
+	struct sockaddr_in serverAddress;
+	serverAddress.sin_family = AF_INET;
+	inet_pton(AF_INET, SERVER_IP, &serverAddress.sin_addr.s_addr);
+	serverAddress.sin_port = htons(SERVER_PORT);
+
+	/**
+	 * Tenta estabelecer a conexão socket TCP entre ESP32 e Servidor;
+	 */
+	rc = connect(sock, (struct sockaddr *)&serverAddress, sizeof(struct sockaddr_in));
+
+	/**
+	 * error? (-1)
+	 */
+	if (DEBUG)
+		ESP_LOGI(TAG, "connect rc: %d", rc);
+
+	if (rc == 0)
+	{
+		/**
+		 * Converte o valor de count para string e envia a string
+		 * ao servidor via socket tcp;
+		 */
+		sprintf(str, "Count = %d\r\n", count);
+		rc = send(sock, str, strlen(str), 0);
+		/**
+		 * error durante o envio? (-1)
+		 */
+		if (DEBUG)
+			ESP_LOGI(TAG, "send: rc: %d", rc);
+	}
+
+	rc = close(sock);
+	/**
+	 * error no fechamento do socket? (-1)
+	 */
+	if (DEBUG)
+		ESP_LOGI(TAG, "close: rc: %d", rc);
 }
