@@ -5,3 +5,4 @@ build/
 .idea/
 .clang-tidy
 /cmake-build-esp32/
+sdkconfig*
