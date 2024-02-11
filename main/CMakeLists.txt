@@ -1,7 +1,6 @@
 
-file(GLOB SOURCES "src/*.c")
 idf_component_register(
-        SRCS "main.c" ${SOURCES}
+        SRCS "main.c"
         INCLUDE_DIRS "."
         INCLUDE_DIRS "./include"
 )
