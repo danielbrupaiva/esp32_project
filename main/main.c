@@ -17,42 +17,54 @@
 #include "freertos/event_groups.h"
 
 #include "gpio.h"
-#include "adc.h"
+//#include "adc.h"
 #include "wifi.h"
+
 
 void app_main(void)
 {
     static const char *TAG = "MAIN";
     ESP_LOGI(TAG, "Start");
+
     esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-    {
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
     /** Configure wifi mode and wait until connection is ESTABLISH**/
-    configure_wifi(WIFI_MODE_AP);
+    wifi_config_t wifi_config = {
+        .ap = {
+            .ssid = ESP_WIFI_SSID,
+            .ssid_len = strlen(ESP_WIFI_SSID),
+            .channel = ESP_WIFI_CHANNEL,
+            .password = ESP_WIFI_PASS,
+            .max_connection = ESP_MAX_STA_CONN,
+            .authmode = WIFI_AUTH_WPA_WPA2_PSK
+        },
+        .sta = {
+            .ssid = ESP_WIFI_SSID,
+            .password = ESP_WIFI_PASS,
+            .threshold.authmode = ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD,
+            .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
+        }
+    };
+    wifi_configure(WIFI_MODE_STA, &wifi_config);
 
     /** Deploy tasks **/
-    if (pdTRUE != xTaskCreate(xLED, "Task LED", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL))
-    {
+    if (pdTRUE != xTaskCreate(xLED, "Task LED", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL)) {
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task LED.");
         return;
     }
-    if (pdTRUE != xTaskCreate(xButton, "Task Button", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL))
-    {
+    if (pdTRUE != xTaskCreate(xButton, "Task Button", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL)) {
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task Button.");
         return;
     }
-    /*
-    if (pdTRUE != xTaskCreate(xADC, "Task ADC", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL))
+
+    /*if (pdTRUE != xTaskCreate(xADC, "Task ADC", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL))
     {
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task ADC.");
         return;
     }*/
-
-
-
 
 }

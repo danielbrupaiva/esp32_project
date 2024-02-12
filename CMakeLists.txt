@@ -5,4 +5,5 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(project_esp32)
+set(PROJECT_NAME project_esp32)
+project(${PROJECT_NAME})
