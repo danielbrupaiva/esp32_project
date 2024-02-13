@@ -3,7 +3,8 @@
 
 #include <esp_system.h>
 #include <esp_event.h>
-#include "esp_event_loop.h"#include <sys/param.h>
+#include "esp_event_loop.h"
+#include "freertos/event_groups.h"
 /* Wifi */
 #include <esp_wifi.h>
 #include <esp_netif.h>
