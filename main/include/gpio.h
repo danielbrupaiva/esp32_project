@@ -1,18 +1,19 @@
 #pragma once
-// digital inputs
-#define DIGITAL_INPUT_0 GPIO_NUM_33
-#define DIGITAL_INPUT_1 GPIO_NUM_32
-#define DIGITAL_INPUT_2 GPIO_NUM_35
-#define DIGITAL_INPUT_3 GPIO_NUM_34
-#define GPIO_INPUT_PIN_SEL ( (1ULL << DIGITAL_INPUT_0) | (1ULL << DIGITAL_INPUT_1) | (1ULL << DIGITAL_INPUT_2) | (1ULL << DIGITAL_INPUT_3)  )
-
-// digital outputs
-#define DIGITAL_OUTPUT_0 GPIO_NUM_26
-#define DIGITAL_OUTPUT_1 GPIO_NUM_27
-#define GPIO_OUTPUT_PIN_SEL ((1ULL << DIGITAL_OUTPUT_0) | (1ULL << DIGITAL_OUTPUT_1))
-
 // Drivers
 #include "driver/gpio.h"
+#include "esp_log.h"
+#include "freertos/queue.h"
+// digital inputs
+#define DIGITAL_INPUT_0 GPIO_NUM_32
+#define DIGITAL_INPUT_1 GPIO_NUM_35
+#define DIGITAL_INPUT_2 GPIO_NUM_34
+#define DIGITAL_INPUT_3 GPIO_NUM_33
+#define GPIO_INPUT_PIN_SEL ( (1ULL << DIGITAL_INPUT_0) | (1ULL << DIGITAL_INPUT_1) | (1ULL << DIGITAL_INPUT_2) | (1ULL << DIGITAL_INPUT_3)  )
+// digital outputs
+#define DIGITAL_OUTPUT_0 GPIO_NUM_23
+#define DIGITAL_OUTPUT_1 GPIO_NUM_22
+#define DIGITAL_OUTPUT_3 GPIO_NUM_
+#define GPIO_OUTPUT_PIN_SEL ( (1ULL << DIGITAL_OUTPUT_0) | (1ULL << DIGITAL_OUTPUT_1) )
 
 typedef void (*pfHandler)(void);
 
@@ -135,8 +136,6 @@ static void xLED(void *arg)
     for (;;) {
         gpio_set_level(DIGITAL_OUTPUT_0, gpio_get_level(DIGITAL_INPUT_0));
         gpio_set_level(DIGITAL_OUTPUT_1, gpio_get_level(DIGITAL_INPUT_1));
-        gpio_set_level(DIGITAL_OUTPUT_0, gpio_get_level(DIGITAL_INPUT_2));
-        gpio_set_level(DIGITAL_OUTPUT_1, gpio_get_level(DIGITAL_INPUT_3));
     }
     vTaskDelete(NULL);
 }
