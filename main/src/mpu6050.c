@@ -1758,9 +1758,9 @@ void mpu6050_get_acceleration(mpu6050_acceleration_t *data)
             6,
             buffer
         );
-    data->accel_x = (((int16_t) buffer[0]) << 8) | buffer[1];
-    data->accel_y = (((int16_t) buffer[2]) << 8) | buffer[3];
-    data->accel_z = (((int16_t) buffer[4]) << 8) | buffer[5];
+    data->x = (((int16_t) buffer[0]) << 8) | buffer[1];
+    data->y = (((int16_t) buffer[2]) << 8) | buffer[3];
+    data->z = (((int16_t) buffer[4]) << 8) | buffer[5];
 }
 
 int16_t mpu6050_get_acceleration_x()
@@ -1824,9 +1824,9 @@ void mpu6050_get_rotation(mpu6050_rotation_t *data)
             6,
             buffer
         );
-    data->gyro_x = (((int16_t) buffer[0]) << 8) | buffer[1];
-    data->gyro_y = (((int16_t) buffer[2]) << 8) | buffer[3];
-    data->gyro_z = (((int16_t) buffer[4]) << 8) | buffer[5];
+    data->x = (((int16_t) buffer[0]) << 8) | buffer[1];
+    data->y = (((int16_t) buffer[2]) << 8) | buffer[3];
+    data->z = (((int16_t) buffer[4]) << 8) | buffer[5];
 }
 
 int16_t mpu6050_get_rotation_x()
@@ -1882,12 +1882,12 @@ void mpu6050_get_motion
             buffer
         );
 
-    data_accel->accel_x = (((int16_t) buffer[0]) << 8) | buffer[1];
-    data_accel->accel_y = (((int16_t) buffer[2]) << 8) | buffer[3];
-    data_accel->accel_z = (((int16_t) buffer[4]) << 8) | buffer[5];
-    data_gyro->gyro_x = (((int16_t) buffer[8]) << 8) | buffer[9];
-    data_gyro->gyro_y = (((int16_t) buffer[10]) << 8) | buffer[11];
-    data_gyro->gyro_z = (((int16_t) buffer[12]) << 8) | buffer[13];
+    data_accel->x = (((int16_t) buffer[0]) << 8) | buffer[1];
+    data_accel->y = (((int16_t) buffer[2]) << 8) | buffer[3];
+    data_accel->z = (((int16_t) buffer[4]) << 8) | buffer[5];
+    data_gyro->x = (((int16_t) buffer[8]) << 8) | buffer[9];
+    data_gyro->y = (((int16_t) buffer[10]) << 8) | buffer[11];
+    data_gyro->z = (((int16_t) buffer[12]) << 8) | buffer[13];
 }
 
 uint8_t mpu6050_get_external_sensor_byte(int position)

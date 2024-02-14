@@ -25,16 +25,16 @@
 
 typedef struct _mpu6050_acceleration_t
 {
-    int16_t accel_x;
-    int16_t accel_y;
-    int16_t accel_z;
+    int16_t x;
+    int16_t y;
+    int16_t z;
 } mpu6050_acceleration_t;
 
 typedef struct _mpu6050_rotation_t
 {
-    int16_t gyro_x;
-    int16_t gyro_y;
-    int16_t gyro_z;
+    int16_t x;
+    int16_t y;
+    int16_t z;
 } mpu6050_rotation_t;
 
 uint8_t mpu6050_device_address;

@@ -113,15 +113,15 @@ void wifi_configure(wifi_mode_t wifi_mode, wifi_config_t *config)
                                            portMAX_DELAY);
 
     if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG, "connected to ap SSID:%s password:", ESP_WIFI_SSID);
+        ESP_LOGI(TAG, "connected to ap SSID:%s", ESP_WIFI_SSID);
     }
     else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:", ESP_WIFI_SSID);
+        ESP_LOGI(TAG, "Failed to connect to SSID:%s", ESP_WIFI_SSID);
     }
     else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }
-    //vEventGroupDelete(wifi_event_group);
+    vEventGroupDelete(wifi_event_group);
 }
 
 void wifi_access_point_mode_configure(wifi_config_t *config)
