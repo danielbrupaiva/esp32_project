@@ -22,58 +22,55 @@
 #include "esp_sntp.h"
 #include "esp_eth.h"
 
-static void obtain_time(void);
-static void initialize_sntp(void);
+//TODO: implement get_microsecond method
 
+static void initialize_sntp(void);
+struct tm get_time_info(void);
 void time_sync_notification_cb(struct timeval *tv)
 {
-    static const char *TAG = "SNTP";
+    static const char *TAG = "Timestamp";
     ESP_LOGI(TAG, "Notification of a time synchronization event");
 }
 
-static void obtain_time(void)
+struct tm get_time_info(void)
 {
+    time_t now;
+    time(&now);
+    struct tm timeinfo;
+    localtime_r(&now, &timeinfo);
+    return timeinfo;
 }
 
 static void initialize_sntp(void)
 {
+    esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
+    esp_sntp_setservername(0, "pool.ntp.org");
+    sntp_set_time_sync_notification_cb(time_sync_notification_cb);
+    sntp_set_sync_mode(SNTP_SYNC_MODE_SMOOTH);
+    esp_sntp_init();
+    // Set timezone to Brazil Standard Time
+    setenv("TZ", "BRT+3", 1);
+    tzset();
 }
 
 void xTimeStamp()
 {
-
     static const char *TAG = "Timestamp";
-
     ESP_LOGI(TAG, "Initializing SNTP");
-    esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
-    esp_sntp_setservername(0, "pool.ntp.org");
-    sntp_set_time_sync_notification_cb(time_sync_notification_cb);
-
-    sntp_set_sync_mode(SNTP_SYNC_MODE_SMOOTH);
-
-    esp_sntp_init();
-
-    // Set timezone to Brazil Standard Time
-    setenv("TZ", "BRT+3", 1);
-    tzset();
-
-    time_t now;
-    char strftime_buf[64];
-    struct tm timeinfo;
+    initialize_sntp();
 
     for (;;) {
 
-        time(&now);
-        localtime_r(&now, &timeinfo);
+        char strftime_buf[100];
+        struct tm timeinfo = get_time_info();
         strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
-        ESP_LOGI(TAG, "%s", strftime_buf);
 
-//    TODO: implement microsecond
-//    struct timeval tv_now;
-//    gettimeofday(&tv_now, NULL);
-//    int64_t time_us = (int64_t) tv_now.tv_sec * 1000000L + (int64_t) tv_now.tv_usec;
-//    ESP_LOGI(TAG, "%lld us", time_us);
+        struct timeval tv_now;
+        gettimeofday(&tv_now, NULL);
+        int64_t time_us = (int64_t) tv_now.tv_usec;
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        ESP_LOGI(TAG, "%s.%lld", strftime_buf, time_us / 1000);
+
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
