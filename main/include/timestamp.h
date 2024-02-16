@@ -1,12 +1,5 @@
 #pragma once
-/* LwIP SNTP example
 
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
@@ -22,10 +15,12 @@
 #include "esp_sntp.h"
 #include "esp_eth.h"
 
-//TODO: implement get_microsecond method
+void time_sync_notification_cb(struct timeval *tv);
 
-static void initialize_sntp(void);
 struct tm get_time_info(void);
+
+void initialize_sntp(void);
+
 void time_sync_notification_cb(struct timeval *tv)
 {
     static const char *TAG = "Timestamp";
@@ -40,9 +35,10 @@ struct tm get_time_info(void)
     localtime_r(&now, &timeinfo);
     return timeinfo;
 }
-
-static void initialize_sntp(void)
+void initialize_sntp(void)
 {
+    static const char *TAG = "Timestamp";
+    ESP_LOGI(TAG, "Initializing SNTP");
     esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
     esp_sntp_setservername(0, "pool.ntp.org");
     sntp_set_time_sync_notification_cb(time_sync_notification_cb);
@@ -53,24 +49,33 @@ static void initialize_sntp(void)
     tzset();
 }
 
+static volatile double timestamp = 0;
+
+void print_timestamp()
+{
+    static const char *TAG = "Timestamp";
+    char strftime_buf[120];
+    struct tm timeinfo = get_time_info();
+
+    strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
+
+    struct timeval tv_now;
+    gettimeofday(&tv_now, NULL);
+    int64_t time_us = (int64_t) tv_now.tv_usec;
+
+    ESP_LOGI(TAG, "%s.%lld", strftime_buf, time_us / 1000);
+}
+
 void xTimeStamp()
 {
     static const char *TAG = "Timestamp";
-    ESP_LOGI(TAG, "Initializing SNTP");
+
     initialize_sntp();
 
     for (;;) {
 
-        char strftime_buf[100];
-        struct tm timeinfo = get_time_info();
-        strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
-
-        struct timeval tv_now;
-        gettimeofday(&tv_now, NULL);
-        int64_t time_us = (int64_t) tv_now.tv_usec;
-
-        ESP_LOGI(TAG, "%s.%lld", strftime_buf, time_us / 1000);
-
+        print_timestamp();
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
+    vTaskDelete(NULL);
 }

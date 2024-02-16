@@ -15,6 +15,15 @@
 #define DIGITAL_OUTPUT_3 GPIO_NUM_
 #define GPIO_OUTPUT_PIN_SEL ( (1ULL << DIGITAL_OUTPUT_0) | (1ULL << DIGITAL_OUTPUT_1) )
 
+typedef struct _gpio_t
+{
+    bool state;
+} gpio_t;
+
+gpio_t leds[2] = {{true}, {true}};
+
+gpio_t push_buttons[4] = {{true}, {true}, {true}, {true}};
+
 typedef void (*pfHandler)(void);
 
 static QueueHandle_t gpio_evt_queue = NULL;

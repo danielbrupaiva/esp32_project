@@ -4,32 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESP32 WebServer</title>
+    <div id="top">
+        <img class="logo" src="https://www.sp.senai.br/images/senai.svg" alt="logo">
+        <h1>ESP32 WebServer application</h1>
+        <h2>Author: Daniel Paiva</h2>
+        <h>WebServer aplication using ESP32 to remotely control and monitoring sensors at field</h>
+        <hr>
+
+    </div>
+    <!-- Add icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
-        .esp{
-            float: left;
+        .led{
+            padding: 14px 28px;
+            scale: 1.5;
         }
+        .btn {
+            border: none;
+            color: white;
+            padding: 14px 28px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .success {background-color: #04AA6D;} /* Green */
+        .success:hover {background-color: #46a049;}
+        .info {background-color: #2196F3;} /* Blue */
+        .info:hover {background: #0b7dda;}
+        .warning {background-color: #ff9800;} /* Orange */
+        .warning:hover {background: #e68a00;}
+        .danger {background-color: #f44336;} /* Red */
+        .danger:hover {background: #da190b;}
+        .default {background-color: #e7e7e7; color: black;} /* Gray */
+        .default:hover {background: #ddd;}
+
     </style>
 </head>
 <body>
-<div class="header">
-    <img class="logo" src="https://www.sp.senai.br/images/senai.svg" alt="logo">
-    <div><img class="esp" src="https://www.espressif.com/sites/all/themes/espressif/images/esp32-c6/esp32-c6-modules.png" alt="esp32">
-    <h1>ESP32 WebServer application</h1>
-    <h2>Author: Daniel Paiva</h2>
-    <h>WebServer aplication using ESP32 to remotely control and monitoring sensors at field</h></div>
+<div id="gpios" class="gpios">
+    <h2>GPIO</a></h2>
+    <p>Push buttons [ON/OFF]</p>
+    <div class="tab-buttons">
+        <button class="btn default">Button1</button>
+        <button class="btn default">Button2</button>
+        <button class="btn default">Button3</button>
+        <button class="btn default">Button4</button>
+        <hr>
+    </div>
+    <p>LEDs</p>
+    <i class="led material-icons">toggle_off</i>
+    <i class="led material-icons">toggle_on</i>
+    <i class="material-icons"> radio_button_checked </i>
+    <i class="material-icons"> radio_button_unchecked </i>
 </div>
-<div class="digital_sensors">
-    <h2>Discrete sensors</h2>
-    <p>LEDs and control buttons [ON/OFF]</p>
-</div>
-<div class="analog_sensors">
+<div id="adc_sensors" class="adc_sensors">
     <h2>Analog sensor</h2>
     <p>Analog input sensor [0-5V]</p>
+    <hr>
 </div>
-<div class="i2c">
-    <h2>I2C communication</h2>
-    <p>MPU6050 accel/gyro module</p>
+<div id="i2c" class="i2c">
+    <h2>MPU6050 accel/gyro module</h2>
+    <p>MPU6050 module as I2C communication example</p>
+    <hr>
 </div>
+
+<footer>
+    <a href="#top">HOME</a>
+    <a href="#gpios">GPIOs</a>
+    <a href="#adc_sensors">ADC</a>
+    <a href="#i2c">MPU6050</a>
+</footer>
 <script></script>
 </body>
 </html>
