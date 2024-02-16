@@ -1,12 +1,10 @@
-#pragma once
-// Log
-#include "esp_log.h"
-#include "freertos/task.h"
-#include "driver/adc.h"
-// analog inputs
-#define ADC1_CH_0 ADC1_CHANNEL_0
+#include "esp32-adc.h"
 
-volatile float sensor_value = 0.0f;
+#include <esp_log.h>
+// FreeRTOS
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <driver/adc.h>
 
 void configure_adc()
 {
