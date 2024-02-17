@@ -33,7 +33,7 @@ void xADC(void *arg)
     for (;;) {
         adc_sensors[0].value = (float) adc1_get_raw(ADC1_CH_0) * 100 / 4095;
 //        ESP_LOGI(TAG, "Sensor value: %0.2f", adc_sensors[0].value);
-        vTaskDelay(acquisition_time_ms);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);
 }

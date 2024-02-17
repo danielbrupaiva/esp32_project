@@ -120,7 +120,7 @@ void xPayload(void *arg)
         ESP_LOGI(TAG, "%s.%lld", strftime_buf, (uint64_t) timestamp.tv_now.tv_usec);
         create_json_object(&timestamp, strftime_buf);
 
-        vTaskDelay(acquisition_time_ms);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);
 }

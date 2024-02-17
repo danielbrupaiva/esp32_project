@@ -60,13 +60,11 @@ timestamp_t get_timestamp()
 
 void xTimeStamp(void *arg)
 {
-    static const char *TAG = "Timestamp";
-
     initialize_sntp();
 
     for (;;) {
         print_timestamp();
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);
 }

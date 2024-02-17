@@ -1,5 +1,6 @@
 #include "esp32-http-server.h"
-
+#include "payload.h"
+#include "timestamp.h"
 /* HTTP server */
 static esp_err_t http_server_get_root_handler(httpd_req_t *req)
 {
@@ -32,8 +33,13 @@ static void generate_async_resp(void *arg)
     static const char *TAG = "HTTP_SERVER";
     // Data format to be sent from the server as a response to the client
     char http_string[250];
-//    char *data_string = create_json_object(&accel, &gyro);
-    char *data_string = "Hello from ESP32 websocket server ...";
+
+    timestamp_t timestamp = get_timestamp();
+    char strftime_buf[120];
+    strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timestamp.timeinfo);
+
+    char *data_string = create_json_object(&timestamp, strftime_buf);
+//    char *data_string = "Hello from ESP32 websocket server ...";
     sprintf(http_string, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n", strlen(data_string));
 
     // Initialize asynchronous response data structure

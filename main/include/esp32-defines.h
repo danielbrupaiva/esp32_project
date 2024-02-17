@@ -22,9 +22,6 @@
 #define I2C_SDA GPIO_NUM_12
 #define I2C_SCL GPIO_NUM_14
 
-/** GLOBALS VARIABLES **/
-static uint32_t acquisition_time_ms = 100 / portTICK_PERIOD_MS;
-
 typedef struct _gpio_t
 {
     gpio_num_t pin_number;

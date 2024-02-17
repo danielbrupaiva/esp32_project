@@ -29,13 +29,11 @@ void configure_mpu6050(void)
     static const char *TAG = "MPU6050";
 
     configure_i2c();
-    //mpu6050_reset();
-    //ESP_LOGI(TAG, "reset successfully");
+//    mpu6050_reset();
+//    ESP_LOGI(TAG, "reset successfully");
     mpu6050_init();
 
-    while (!mpu6050_test_connection()) {
-
-    }
+    while (!mpu6050_test_connection()) {}
 
     if (mpu6050_test_connection()) {
         ESP_LOGI(TAG, "mpu detected");
@@ -78,7 +76,7 @@ void xMPU6050(void *arg)
     for (;;) {
         get_mpu6050_accel_data();
         get_mpu6050_gyro_data();
-        vTaskDelay(acquisition_time_ms);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);
 }
