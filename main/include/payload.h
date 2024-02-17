@@ -1,19 +1,9 @@
 #pragma once
 
-#include <esp_log.h>
-#include "cJSON.h"
-#include "cJSON_Utils.h"
-#include "mpu6050.h"
+#include "esp32-defines.h"
 
+static volatile uint64_t payload_id = 0;
 
-typedef struct _payload
-{
-    uint32_t id;
-    mpu6050_acceleration_t accel;
-    mpu6050_rotation_t gyro;
+char *create_json_object(timestamp_t *timestamp, char *strftime_buf);
 
-} payload_t;
-
-static uint64_t id = 0;
-
-char *create_json_object(void);
+void xPayload(void *arg);

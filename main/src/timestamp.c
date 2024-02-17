@@ -1,5 +1,12 @@
 #include "timestamp.h"
 
+#include <string.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_log.h"
+#include "esp_attr.h"
+#include "esp_sntp.h"
+#include "esp_eth.h"
 
 void time_sync_notification_cb(struct timeval *tv)
 {
@@ -35,22 +42,29 @@ void print_timestamp()
     char strftime_buf[120];
     struct tm timeinfo = get_time_info();
 
-    strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
-
     struct timeval tv_now;
     gettimeofday(&tv_now, NULL);
-    int64_t time_us = (int64_t) tv_now.tv_usec;
+    uint64_t time_us = (int64_t) tv_now.tv_usec;
 
+    strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timeinfo);
     ESP_LOGI(TAG, "%s.%lld", strftime_buf, time_us / 1000);
 }
-void xTimeStamp()
+
+timestamp_t get_timestamp()
+{
+    timestamp_t timestamp;
+    timestamp.timeinfo = get_time_info();
+    gettimeofday(&timestamp.tv_now, NULL);
+    return timestamp;
+}
+
+void xTimeStamp(void *arg)
 {
     static const char *TAG = "Timestamp";
 
     initialize_sntp();
 
     for (;;) {
-
         print_timestamp();
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }

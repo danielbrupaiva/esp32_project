@@ -1,6 +1,3 @@
-#define DEBUG 1
-
-#include <string.h>
 // Log
 #include <esp_log.h>
 #include <esp_event.h>
@@ -13,14 +10,14 @@
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
 #include <freertos/event_groups.h>
+// Project files
 
 #include "esp32-gpio.h"
 #include "esp32-adc.h"
-#include "esp32-wifi.h"
 #include "esp32-i2c.h"
-#include "timestamp.h"
-#include "payload.h"
+#include "esp32-wifi.h"
 
+#include "payload.h"
 
 void app_main(void)
 {
@@ -72,7 +69,7 @@ void app_main(void)
         return;
     }
 
-    if (pdTRUE != xTaskCreate(xTimeStamp, "Task TimeStamp", configMINIMAL_STACK_SIZE + 2048, NULL, 1, NULL)) {
+    if (pdTRUE != xTaskCreate(xPayload, "Task TimeStamp", configMINIMAL_STACK_SIZE + 2048, NULL, 1, NULL)) {
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task TimeStamp.");
         return;
     }

@@ -1,10 +1,18 @@
 #include "esp32-adc.h"
-
-#include <esp_log.h>
 // FreeRTOS
+#include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <driver/adc.h>
+
+extern uint32_t acquisition_time_ms;
+
+volatile adc_t adc_sensors[1] = {
+    {
+        .adc_channel = ADC_CHANNEL_0,
+        .name = "LDR_sensor",
+        .value = 0
+    }
+};
 
 void configure_adc()
 {
@@ -23,9 +31,9 @@ void xADC(void *arg)
     configure_adc();
     ESP_LOGI(TAG, " configuration done!");
     for (;;) {
-        sensor_value = get_adc_sensor_value();
-        ESP_LOGI(TAG, "Sensor value: %0.2f", sensor_value);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        adc_sensors[0].value = (float) adc1_get_raw(ADC1_CH_0) * 100 / 4095;
+//        ESP_LOGI(TAG, "Sensor value: %0.2f", adc_sensors[0].value);
+        vTaskDelay(acquisition_time_ms);
     }
     vTaskDelete(NULL);
 }

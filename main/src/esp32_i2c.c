@@ -1,5 +1,13 @@
 #include "esp32-i2c.h"
 
+#include <esp_log.h>
+#include "mpu6050.h"
+
+extern uint32_t acquisition_time_ms;
+
+volatile mpu6050_acceleration_float_t acceleration;
+
+volatile mpu6050_rotation_float_t gyroscope;
 
 void configure_i2c(void)
 {
@@ -25,44 +33,44 @@ void configure_mpu6050(void)
     //ESP_LOGI(TAG, "reset successfully");
     mpu6050_init();
 
-    while (!mpu6050_test_connection()) {}
+    while (!mpu6050_test_connection()) {
+
+    }
 
     if (mpu6050_test_connection()) {
         ESP_LOGI(TAG, "mpu detected");
     }
 }
-mpu6050_acceleration_t get_mpu6050_accel_data(void)
+mpu6050_acceleration_float_t get_mpu6050_accel_data(void)
 {
     static const char *TAG = "MPU6050";
 
-    mpu6050_acceleration_t accel = {0};
     mpu6050_acceleration_t raw_acc_data = {0};
     float acc_scale_factor = 16384.0;
     mpu6050_get_acceleration(&raw_acc_data);
 
-    accel.x = (float) raw_acc_data.x / acc_scale_factor;
-    accel.y = (float) raw_acc_data.y / acc_scale_factor;
-    accel.z = (float) raw_acc_data.z / acc_scale_factor;
+    acceleration.x = (float) raw_acc_data.x / acc_scale_factor;
+    acceleration.y = (float) raw_acc_data.y / acc_scale_factor;
+    acceleration.z = (float) raw_acc_data.z / acc_scale_factor;
     ESP_LOGI(TAG, "accel_x: %0.2f | accel_y: %0.2f | accel_z: %0.2f",
-             (float) accel.x, (float) accel.y, (float) accel.z);
-    return accel;
+             (float) acceleration.x, (float) acceleration.y, (float) acceleration.z);
+    return acceleration;
 }
 
-mpu6050_rotation_t get_mpu6050_gyro_data(void)
+mpu6050_rotation_float_t get_mpu6050_gyro_data(void)
 {
     static const char *TAG = "MPU6050";
 
-    mpu6050_rotation_t gyro = {0};
     mpu6050_rotation_t raw_gyro_data = {0};
     float gyro_scale_factor = 131.0;
     mpu6050_get_rotation(&raw_gyro_data);
 
-    gyro.x = (float) raw_gyro_data.x / gyro_scale_factor;
-    gyro.y = (float) raw_gyro_data.y / gyro_scale_factor;
-    gyro.z = (float) raw_gyro_data.z / gyro_scale_factor;
+    gyroscope.x = (float) raw_gyro_data.x / gyro_scale_factor;
+    gyroscope.y = (float) raw_gyro_data.y / gyro_scale_factor;
+    gyroscope.z = (float) raw_gyro_data.z / gyro_scale_factor;
     ESP_LOGI(TAG, "gyro_x: %0.2f | gyro_y: %0.2f | gyro_z: %0.2f",
-             (float) gyro.x, (float) gyro.y, (float) gyro.z);
-    return gyro;
+             (float) gyroscope.x, (float) gyroscope.y, (float) gyroscope.z);
+    return gyroscope;
 }
 void xMPU6050(void *arg)
 {
@@ -70,7 +78,7 @@ void xMPU6050(void *arg)
     for (;;) {
         get_mpu6050_accel_data();
         get_mpu6050_gyro_data();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(acquisition_time_ms);
     }
     vTaskDelete(NULL);
 }

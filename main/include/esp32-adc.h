@@ -1,8 +1,10 @@
 #pragma once
 
-#define ADC1_CH_0 ADC1_CHANNEL_0
+#include <driver/adc.h>
 
-static float sensor_value = 0.0f;
+#include "esp32-defines.h"
+
+extern volatile adc_t adc_sensors[1];
 
 void configure_adc();
 
