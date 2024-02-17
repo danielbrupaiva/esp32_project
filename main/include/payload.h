@@ -1,6 +1,7 @@
 #pragma once
 
 #include "esp32-defines.h"
+#include "timestamp.h"
 
 static volatile uint64_t payload_id = 0;
 

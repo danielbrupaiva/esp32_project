@@ -8,7 +8,7 @@
         <img class="logo" src="https://www.sp.senai.br/images/senai.svg" alt="logo">
         <h1>ESP32 WebServer application</h1>
         <h2>Author: Daniel Paiva</h2>
-        <h>WebServer aplication using ESP32 to remotely control and monitoring sensors at field</h>
+        <h>WebServer aplication using ESP32 for remotely control and monitoring sensors at field</h>
         <hr>
 
     </div>
@@ -18,7 +18,12 @@
     <style>
         .led{
             padding: 14px 28px;
-            scale: 1.5;
+            border: none;
+            cursor: pointer;
+            background-color: #fff;
+            display: inline-block;
+            text-decoration: none;
+            color: #333;
         }
         .btn {
             border: none;
@@ -39,6 +44,11 @@
         .default {background-color: #e7e7e7; color: black;} /* Gray */
         .default:hover {background: #ddd;}
 
+        .material-icons {
+            vertical-align: middle;
+        }
+
+
     </style>
 </head>
 <body>
@@ -46,26 +56,44 @@
     <h2>GPIO</a></h2>
     <p>Push buttons [ON/OFF]</p>
     <div class="tab-buttons">
-        <button class="btn default">Button1</button>
-        <button class="btn default">Button2</button>
-        <button class="btn default">Button3</button>
-        <button class="btn default">Button4</button>
+        <button class="btn default">BTN0</button>
+        <button class="btn default">BTN1</button>
+        <button class="btn default">BTN2</button>
+        <button class="btn default">BTN3</button>
         <hr>
     </div>
+    <div class="leds">
     <p>LEDs</p>
-    <i class="led material-icons">toggle_off</i>
-    <i class="led material-icons">toggle_on</i>
-    <i class="material-icons"> radio_button_checked </i>
-    <i class="material-icons"> radio_button_unchecked </i>
+        <button class="led" id="radioButton1" onclick="toggleRadio('radioButton1')">
+            <span class="material-icons">radio_button_unchecked</span>
+            <span id="radioText1">LED0</span>
+        </button>
+        <button class="led" id="radioButton2" onclick="toggleRadio('radioButton2')">
+            <span class="material-icons">radio_button_unchecked</span>
+            <span id="radioText2">LED1</span>
+        </button>
+    </div>
 </div>
+    <hr>
 <div id="adc_sensors" class="adc_sensors">
     <h2>Analog sensor</h2>
-    <p>Analog input sensor [0-5V]</p>
+    <p>Analog input sensor [0-5V]: <b>100.0%</b></p>
     <hr>
 </div>
 <div id="i2c" class="i2c">
     <h2>MPU6050 accel/gyro module</h2>
     <p>MPU6050 module as I2C communication example</p>
+    <div id="accel" >
+        <p>axis_x : <b>12.34</b></p>
+        <p>axis_y : <b>12.34</b></p>
+        <p>axis_z : <b>12.34</b></p>
+    </div>
+    <div id="gyro">
+        <p>gyro_x : <b>12.34</b></p>
+        <p>gyro_y : <b>12.34</b></p>
+        <p>gyro_z : <b>12.34</b></p>
+    </div>
+
     <hr>
 </div>
 
@@ -75,7 +103,16 @@
     <a href="#adc_sensors">ADC</a>
     <a href="#i2c">MPU6050</a>
 </footer>
-<script></script>
+<script>
+    function toggleRadio(buttonId) {
+        var radioIcon = document.getElementById(buttonId).querySelector('.material-icons');
+        if (radioIcon.textContent === 'radio_button_unchecked') {
+            radioIcon.textContent = 'radio_button_checked';
+        } else {
+            radioIcon.textContent = 'radio_button_unchecked';
+        }
+    }
+</script>
 </body>
 </html>
 

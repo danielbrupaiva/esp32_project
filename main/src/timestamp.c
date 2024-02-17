@@ -63,7 +63,7 @@ void xTimeStamp(void *arg)
     initialize_sntp();
 
     for (;;) {
-        print_timestamp();
+//        print_timestamp();
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
     vTaskDelete(NULL);

@@ -68,4 +68,9 @@ void app_main(void)
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task MPU6050.");
         return;
     }
+
+    if (pdTRUE != xTaskCreate(xTimeStamp, "Task TimeStamp", configMINIMAL_STACK_SIZE + 2048, NULL, 1, NULL)) {
+        ESP_LOGI(TAG, "error - nao foi possivel alocar Task TimeStamp.");
+        return;
+    }
 }

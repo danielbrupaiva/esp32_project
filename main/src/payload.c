@@ -1,6 +1,5 @@
 #include "payload.h"
 
-#include "timestamp.h"
 #include <esp_log.h>
 #include "cJSON.h"
 
