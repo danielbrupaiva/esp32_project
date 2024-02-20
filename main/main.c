@@ -16,7 +16,7 @@
 #include "esp32-adc.h"
 #include "esp32-i2c.h"
 #include "esp32-wifi.h"
-
+#include "esp32-mqtt.h"
 #include "payload.h"
 
 void app_main(void)
@@ -71,6 +71,11 @@ void app_main(void)
 
     if (pdTRUE != xTaskCreate(xTimeStamp, "Task TimeStamp", configMINIMAL_STACK_SIZE + 2048, NULL, 1, NULL)) {
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task TimeStamp.");
+        return;
+    }
+
+    if (xTaskCreate(xPayload, "Task MQTTPublish", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL) != pdTRUE) {
+        ESP_LOGI(TAG, "error - nao foi possivel alocar Task xPayload.");
         return;
     }
 }

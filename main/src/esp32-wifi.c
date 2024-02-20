@@ -1,5 +1,25 @@
 #include "esp32-wifi.h"
 
+#include <esp_log.h>
+#include <esp_system.h>
+#include <esp_event.h>
+#include <esp_event_loop.h>
+#include <freertos/event_groups.h>
+
+/* Wifi */
+#include <esp_wifi.h>
+#include <esp_netif.h>
+#include <esp_netif_types.h>
+#include <esp_wifi_types.h>
+#include <esp_http_server.h>
+/* Lwip */
+#include <lwip/err.h>
+#include <lwip/sys.h>
+#include <lwip/sockets.h>
+#include <lwip/api.h>
+#include <lwip/netdb.h>
+#include <lwip/ip4_addr.h>
+
 /* Wifi */
 /** Configure and start wifi connection **/
 void wifi_configure(wifi_mode_t wifi_mode, wifi_config_t *config)

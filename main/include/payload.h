@@ -3,8 +3,16 @@
 #include "esp32-defines.h"
 #include "timestamp.h"
 
-static volatile uint64_t payload_id = 0;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+static uint64_t payload_id = 0;
 
 char *create_json_object(timestamp_t *timestamp, char *strftime_buf);
 
 void xPayload(void *arg);
+
+#ifdef __cplusplus
+}
+#endif

@@ -99,7 +99,7 @@ char *create_json_object(timestamp_t *timestamp, char *strftime_buf)
     cJSON_AddNumberToObject(gyro_object, "z", gyroscope.z);
 
     char *json_str = cJSON_Print(root);
-    ESP_LOGI(TAG, "%s", json_str);
+    //ESP_LOGI(TAG, "%s", json_str);
     cJSON_Delete(root);
     return json_str;
 
@@ -109,14 +109,14 @@ void xPayload(void *arg)
 {
     static const char *TAG = "Payload";
 
-    initialize_sntp();
+    //initialize_sntp();
 
     for (;;) {
 
         timestamp_t timestamp = get_timestamp();
         char strftime_buf[120];
         strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timestamp.timeinfo);
-        ESP_LOGI(TAG, "%s.%lld", strftime_buf, (uint64_t) timestamp.tv_now.tv_usec);
+        //ESP_LOGI(TAG, "%s.%lld", strftime_buf, (uint64_t) timestamp.tv_now.tv_usec);
         create_json_object(&timestamp, strftime_buf);
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);

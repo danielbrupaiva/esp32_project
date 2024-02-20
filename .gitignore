@@ -7,3 +7,4 @@ build/
 /cmake-build-esp32/
 sdkconfig*
 /cJSON/
+/wifi.md

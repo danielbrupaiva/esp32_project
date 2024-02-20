@@ -6,6 +6,8 @@
 
 $ get_idf
 
+$ idf.py menuconfig
+
 $ idf.py set-target esp32
 
 $ idf.py clean
@@ -22,13 +24,10 @@ $ idf.py -p /dev/ttyUSB0 build flash monitor
 
 - Task sync.
 - InterProcess Comunication ("ping-pong")
-
 - Study NVS usage
 - Implement Watchdog timer -> task monitor (queue)
-- Implement MQTT
-- Implement WebServer
-
-- Implement I2C connection
 - Implement UART connection
-
+- Implement mDNS
+-
 - Convert to Zephyr RTOS ?
+

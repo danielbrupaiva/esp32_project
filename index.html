@@ -17,22 +17,88 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
         .led{
-            padding: 14px 28px;
+            position: relative;
+            display: inline-grid;
+            margin: 20px 10px;
+            padding: 24px;
+
             border: none;
             cursor: pointer;
-            background-color: #fff;
-            display: inline-block;
             text-decoration: none;
             color: #333;
+            background-color: #ecf0f1;
+            transition: background-color .3s;
         }
         .btn {
-            border: none;
-            color: white;
-            padding: 14px 28px;
-            font-size: 16px;
+            position: relative;
+            display: inline-grid;
+            margin: 20px 10px;
+            padding: 24px;
+
+            overflow: hidden;
             cursor: pointer;
-            border-radius: 5px;
+            border: none;
+            border-radius: 2px;
+            outline: none;
+
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+
+            background-color: #2ecc71;
+            color: #ecf0f1;
+
+            transition: background-color .3s;
         }
+        .btn:hover {
+            background-color: #27ae60;
+        }
+        .btn > * {
+            position: relative;
+        }
+
+        .btn span {
+            display: inline-grid;
+            padding: 12px 24px;
+        }
+        .btn:before {
+            content: "";
+            position: relative;
+            top: 50%;
+            left: 50%;
+            display: inline-grid;
+            width: 0;
+            padding-top: 0;
+            border-radius: 100%;
+            background-color: rgba(236, 240, 241, .3);
+            -webkit-transform: translate(-50%, -50%);
+            -moz-transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            -o-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+        html {
+            position: relative;
+            height: 100%;
+        }
+        h2 {
+            font-weight: normal;
+        }
+        body {
+            position: relative;
+            top: 0%;
+            left: 0%;
+
+            /*-webkit-transform: translate(-50%, -50%);*/
+            /*-moz-transform: translate(-50%, -50%);*/
+            /*-ms-transform: translate(-50%, -50%);*/
+            /*-o-transform: translate(-50%, -50%);*/
+            /*transform: translate(-50%, -50%);*/
+
+            background-color: #ecf0f1;
+            color: #34495e;
+            font-family: Trebuchet, Arial, sans-serif;
+            text-align: center;
+        }
+
         .success {background-color: #04AA6D;} /* Green */
         .success:hover {background-color: #46a049;}
         .info {background-color: #2196F3;} /* Blue */
@@ -48,21 +114,21 @@
             vertical-align: middle;
         }
 
-
     </style>
 </head>
 <body>
 <div id="gpios" class="gpios">
     <h2>GPIO</a></h2>
     <p>Push buttons [ON/OFF]</p>
-    <div class="tab-buttons">
-        <button class="btn default">BTN0</button>
-        <button class="btn default">BTN1</button>
-        <button class="btn default">BTN2</button>
-        <button class="btn default">BTN3</button>
+    <div class="buttons-container">
+        <button id="btn0" class="btn" type="button">BTN0</button>
+        <button id="btn1" class="btn" type="button">BTN1</button>
+        <button id="btn2" class="btn" type="button">BTN2</button>
+        <button id="btn3" class="btn" type="button">BTN3</button>
         <hr>
     </div>
-    <div class="leds">
+
+    <div class="leds-container">
     <p>LEDs</p>
         <button class="led" id="radioButton1" onclick="toggleRadio('radioButton1')">
             <span class="material-icons">radio_button_unchecked</span>
@@ -88,6 +154,7 @@
         <p>axis_y : <b>12.34</b></p>
         <p>axis_z : <b>12.34</b></p>
     </div>
+    <br>
     <div id="gyro">
         <p>gyro_x : <b>12.34</b></p>
         <p>gyro_y : <b>12.34</b></p>
@@ -104,6 +171,8 @@
     <a href="#i2c">MPU6050</a>
 </footer>
 <script>
+    // WebSocket connection
+    // const socket = new WebSocket('http://10.0.0.8/ws');
     function toggleRadio(buttonId) {
         var radioIcon = document.getElementById(buttonId).querySelector('.material-icons');
         if (radioIcon.textContent === 'radio_button_unchecked') {
@@ -112,6 +181,22 @@
             radioIcon.textContent = 'radio_button_unchecked';
         }
     }
+    // Function to send state change to server
+    function sendState(buttonId, state) {
+        const message = { buttonId, state };
+        console.log(message);
+        // socket.send(JSON.stringify(message));
+    }
+    // Event listener for button clicks
+    document.querySelectorAll('.btn').forEach((button) => {
+        button.addEventListener('change', (event) => {
+            const buttonId = event.target.id;
+            const state = event.target.checked ? 'on' : 'off';
+            sendState(buttonId, state);
+        });
+    });
+
+
 </script>
 </body>
 </html>

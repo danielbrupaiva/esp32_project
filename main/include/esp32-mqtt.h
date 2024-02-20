@@ -1,33 +1,44 @@
 #pragma once
 
-#include "esp_log.h"
-#include "freertos/event_groups.h"
-#include "cJSON.h"
+#include <esp_log.h>
+#include <esp_system.h>
+#include <esp_event.h>
+#include <esp_event_loop.h>
+#include <freertos/event_groups.h>
+
+#include "esp32-defines.h"
 
 #define DEBUG true
 
-#define MQTT_ADDR "mqtt://localhost:1883"
-#define MQTT_USER "admin"
+#define MQTT_ADDR "broker.emqx.io"
+#define MQTT_USER ""
 #define MQTT_PASS MQTT_USER
 // Lib MQTT
 #include "mqtt_client.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 static EventGroupHandle_t mqtt_event_group;
 
 esp_mqtt_client_handle_t mqtt_client;
 
 static esp_err_t mqtt_event_handler_callback(esp_mqtt_event_handle_t event);
+
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data);
 static void mqtt_app_start(void);
-static void mqtt_publish_msg(void);
-
-static void xMQTTPublish(void *arg)
+static void mqtt_publish_msg(char *msg);
+void xMQTTPublish(void *arg)
 {
+    mqtt_app_start();
     static const char *TAG = "MQTT PUBLISH ";
     for (;;) {
-
+        mqtt_publish_msg("payload");
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
+
 // MQTT
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 {
@@ -138,9 +149,9 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     }
     return ESP_OK;
 }
-
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
+    static const char *TAG = "MQTT";
     if (DEBUG)
         ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%d", base, event_id);
     mqtt_event_handler_cb(event_data);
@@ -160,104 +171,14 @@ static void mqtt_app_start(void)
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
     esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, client);
     esp_mqtt_client_start(client);
-    mqtt_publish_msg();
 }
-static void mqtt_publish_msg(void)
+
+static void mqtt_publish_msg(char *msg)
 {
-    static const char *TAG = "MQTT PUBLISH MSG";
-    id++;
-    cJSON *data;
-    /* Cria a estrutura de dados MONITOR a ser enviado por JSON */
-    data = cJSON_CreateObject();
-    cJSON_AddNumberToObject(data, "ID", id);
-    cJSON_AddBoolToObject(data, "btnEmerg", btnEmerg);
-    cJSON_AddBoolToObject(data, "btnStart", btnStart);
-    cJSON_AddStringToObject(data, "status", status);
-    cJSON_AddNumberToObject(data, "sensor", sensor);
+    static const char *TAG = "MQTT";
+    static uint64_t id = 0;
 
-    if (esp_mqtt_client_publish(mqtt_client, "data", cJSON_Print(data), strlen(cJSON_Print(data)), 0, 0) == 0) {
-        if (DEBUG) {
-            ESP_LOGI(TAG, "Info data:%s", cJSON_Print(data));
-            ESP_LOGI(TAG, "Mensagem publicada com sucesso!");
-        }
-    }
-    cJSON_Delete(data);
-
-    cJSON *mpu6050_data;
-    mpu6050_data = cJSON_CreateObject();
-
-    cJSON_AddNumberToObject(mpu6050_data, "ID", id);
-    cJSON_AddNumberToObject(mpu6050_data, "accel_x", accel_x);
-    cJSON_AddNumberToObject(mpu6050_data, "accel_y", accel_y);
-    cJSON_AddNumberToObject(mpu6050_data, "accel_z", accel_z);
-    cJSON_AddNumberToObject(mpu6050_data, "gyro_x", accel_x);
-    cJSON_AddNumberToObject(mpu6050_data, "gyro_y", accel_y);
-    cJSON_AddNumberToObject(mpu6050_data, "gyro_z", accel_z);
-
-    if (esp_mqtt_client_publish(mqtt_client,
-                                "mpu6050",
-                                cJSON_Print(mpu6050_data),
-                                strlen(cJSON_Print(mpu6050_data)),
-                                0,
-                                0) == 0) {
-        if (DEBUG) {
-            ESP_LOGI(TAG, "Info mpu6050_data:%s", cJSON_Print(mpu6050_data));
-            ESP_LOGI(TAG, "Mensagem publicada com sucesso!");
-        }
-    }
-    cJSON_Delete(mpu6050_data);
-    /*
-        { //TAGO IOT
-          data = cJSON_CreateObject();
-
-          cJSON_AddBoolToObject(data, "btnEmerg", btnEmerg);
-
-          if (esp_mqtt_client_publish(mqtt_client, "data", cJSON_Print(data), strlen(cJSON_Print(data)), 0, 0) == 0)
-          {
-              if (DEBUG)
-              {
-                  ESP_LOGI(TAG, "Info data:%s", cJSON_Print(data));
-                  ESP_LOGI(TAG, "Mensagem publicada com sucesso!");
-              }
-          }
-          cJSON_Delete(data);
-
-          data = cJSON_CreateObject();
-          cJSON_AddBoolToObject(data, "btnStart", btnStart);
-
-          if (esp_mqtt_client_publish(mqtt_client, "data", cJSON_Print(data), strlen(cJSON_Print(data)), 0, 0) == 0)
-          {
-              if (DEBUG)
-              {
-                  ESP_LOGI(TAG, "Info data:%s", cJSON_Print(data));
-                  ESP_LOGI(TAG, "Mensagem publicada com sucesso!");
-              }
-          }
-          cJSON_Delete(data);
-          data = cJSON_CreateObject();
-          cJSON_AddStringToObject(data, "status", status);
-
-          if (esp_mqtt_client_publish(mqtt_client, "data", cJSON_Print(data), strlen(cJSON_Print(data)), 0, 0) == 0)
-          {
-              if (DEBUG)
-              {
-                  ESP_LOGI(TAG, "Info data:%s", cJSON_Print(data));
-                  ESP_LOGI(TAG, "Mensagem publicada com sucesso!");
-              }
-          }
-          cJSON_Delete(data);
-
-          data = cJSON_CreateObject();
-          cJSON_AddNumberToObject(data, "sensor", sensor);
-
-          if (esp_mqtt_client_publish(mqtt_client, "data", cJSON_Print(data), strlen(cJSON_Print(data)), 0, 0) == 0)
-          {
-              if (DEBUG)
-              {
-                  ESP_LOGI(TAG, "Info data:%s", cJSON_Print(data));
-                  ESP_LOGI(TAG, "Mensagem publicada com sucesso!");
-              }
-          }
-          cJSON_Delete(data);
-        }*/
 }
+#ifdef __cplusplus
+}
+#endif

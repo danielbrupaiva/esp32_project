@@ -7,6 +7,9 @@
 #include <freertos/event_groups.h>
 #include <esp_http_server.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /** HTTP server **/
 /** Asynchronous response data structure **/
 struct async_resp_arg
@@ -21,3 +24,7 @@ static void http_server_disconnect_handler(void *arg, esp_event_base_t event_bas
 static esp_err_t http_server_get_root_handler(httpd_req_t *req);
 static esp_err_t http_server_async_get_handler(httpd_req_t *req);
 static esp_err_t http_server_404_error_handler(httpd_req_t *req, httpd_err_code_t err);
+
+#ifdef __cplusplus
+}
+#endif
