@@ -130,13 +130,11 @@
 
     <div class="leds-container">
     <p>LEDs</p>
-        <button class="led" id="radioButton1" onclick="toggleRadio('radioButton1')">
-            <span class="material-icons">radio_button_unchecked</span>
-            <span id="radioText1">LED0</span>
+        <button class="led">LED0
+            <span id="led0" class="material-icons">radio_button_unchecked</span>
         </button>
-        <button class="led" id="radioButton2" onclick="toggleRadio('radioButton2')">
-            <span class="material-icons">radio_button_unchecked</span>
-            <span id="radioText2">LED1</span>
+        <button class="led">LED1
+            <span id="led1" class="material-icons">radio_button_unchecked</span>
         </button>
     </div>
 </div>
@@ -172,30 +170,54 @@
 </footer>
 <script>
     // WebSocket connection
-    // const socket = new WebSocket('http://10.0.0.8/ws');
-    function toggleRadio(buttonId) {
-        var radioIcon = document.getElementById(buttonId).querySelector('.material-icons');
-        if (radioIcon.textContent === 'radio_button_unchecked') {
-            radioIcon.textContent = 'radio_button_checked';
-        } else {
-            radioIcon.textContent = 'radio_button_unchecked';
+    var gateway = `ws://${window.location.hostname}/ws`;
+    var websocket;
+    window.addEventListener('load', onLoad);
+    function onLoad(event) {
+        initWebSocket();
+        initButton();
+    }
+    function initWebSocket() {
+        console.log('Trying to open a WebSocket connection...');
+        websocket = new WebSocket(gateway);
+        websocket.onopen = onOpen;
+        websocket.onclose = onClose;
+        websocket.onmessage = onMessage; // <-- add this line
+    }
+    function onOpen(event) {
+        console.log('Connection opened');
+    }
+    function onClose(event) {
+        console.log('Connection closed');
+        setTimeout(initWebSocket, 2000);
+    }
+    function onMessage(event){
+        console.log(event.data)
+    }
+    function initButton(){
+        document.getElementsByClassName('button');
+        document.getElementById('btn0').addEventListener('click', toggle);
+        document.getElementById('btn1').addEventListener('click', toggle);
+        document.getElementById('btn2').addEventListener('click', toggle);
+        document.getElementById('btn3').addEventListener('click', toggle);
+        document.getElementById('led0').addEventListener('click', toggleLED);
+        document.getElementById('led1').addEventListener('click', toggleLED);
+    }
+    function toggle(msg){
+        websocket.send('toggle');
+        console.log(msg.target.id);
+    }
+    function toggleLED(msg){
+        //document.getElementById(msg.target.id).textContent = 'radio_button_checked';
+        var radioIcon = document.getElementById(msg.target.id).textContent;
+        if(radioIcon === 'radio_button_checked'){
+            document.getElementById(msg.target.id).textContent = 'radio_button_unchecked';
         }
+        else{
+            document.getElementById(msg.target.id).textContent = 'radio_button_checked';
+        }
+        console.log(msg.target.id);
     }
-    // Function to send state change to server
-    function sendState(buttonId, state) {
-        const message = { buttonId, state };
-        console.log(message);
-        // socket.send(JSON.stringify(message));
-    }
-    // Event listener for button clicks
-    document.querySelectorAll('.btn').forEach((button) => {
-        button.addEventListener('change', (event) => {
-            const buttonId = event.target.id;
-            const state = event.target.checked ? 'on' : 'off';
-            sendState(buttonId, state);
-        });
-    });
-
 
 </script>
 </body>

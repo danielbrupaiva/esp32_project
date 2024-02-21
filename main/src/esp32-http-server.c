@@ -224,13 +224,11 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "\n"
                            "    <div class=\"leds-container\">\n"
                            "    <p>LEDs</p>\n"
-                           "        <button class=\"led\" id=\"radioButton1\" onclick=\"toggleRadio('radioButton1')\">\n"
-                           "            <span class=\"material-icons\">radio_button_unchecked</span>\n"
-                           "            <span id=\"radioText1\">LED0</span>\n"
+                           "        <button class=\"led\">LED0\n"
+                           "            <span id=\"led0\" class=\"material-icons\">radio_button_unchecked</span>\n"
                            "        </button>\n"
-                           "        <button class=\"led\" id=\"radioButton2\" onclick=\"toggleRadio('radioButton2')\">\n"
-                           "            <span class=\"material-icons\">radio_button_unchecked</span>\n"
-                           "            <span id=\"radioText2\">LED1</span>\n"
+                           "        <button class=\"led\">LED1\n"
+                           "            <span id=\"led1\" class=\"material-icons\">radio_button_unchecked</span>\n"
                            "        </button>\n"
                            "    </div>\n"
                            "</div>\n"
@@ -266,34 +264,60 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "</footer>\n"
                            "<script>\n"
                            "    // WebSocket connection\n"
-                           "    // const socket = new WebSocket('http://10.0.0.8/ws');\n"
-                           "    function toggleRadio(buttonId) {\n"
-                           "        var radioIcon = document.getElementById(buttonId).querySelector('.material-icons');\n"
-                           "        if (radioIcon.textContent === 'radio_button_unchecked') {\n"
-                           "            radioIcon.textContent = 'radio_button_checked';\n"
-                           "        } else {\n"
-                           "            radioIcon.textContent = 'radio_button_unchecked';\n"
-                           "        }\n"
+                           "    var gateway = `ws://${window.location.hostname}/ws`;\n"
+                           "    var websocket;\n"
+                           "    window.addEventListener('load', onLoad);\n"
+                           "    function onLoad(event) {\n"
+                           "        initWebSocket();\n"
+                           "        initButton();\n"
                            "    }\n"
-                           "    // Function to send state change to server\n"
-                           "    function sendState(buttonId, state) {\n"
-                           "        const message = { buttonId, state };\n"
-                           "        console.log(message);\n"
-                           "        // socket.send(JSON.stringify(message));\n"
+                           "    function initWebSocket() {\n"
+                           "        console.log('Trying to open a WebSocket connection...');\n"
+                           "        websocket = new WebSocket(gateway);\n"
+                           "        websocket.onopen = onOpen;\n"
+                           "        websocket.onclose = onClose;\n"
+                           "        websocket.onmessage = onMessage; // <-- add this line\n"
                            "    }\n"
-                           "    // Event listener for button clicks\n"
-                           "    document.querySelectorAll('.btn').forEach((button) => {\n"
-                           "        button.addEventListener('change', (event) => {\n"
-                           "            const buttonId = event.target.id;\n"
-                           "            const state = event.target.checked ? 'on' : 'off';\n"
-                           "            sendState(buttonId, state);\n"
-                           "        });\n"
-                           "    });\n"
+                           "    function onOpen(event) {\n"
+                           "        console.log('Connection opened');\n"
+                           "    }\n"
+                           "    function onClose(event) {\n"
+                           "        console.log('Connection closed');\n"
+                           "        setTimeout(initWebSocket, 2000);\n"
+                           "    }\n"
+                           "    function onMessage(event){\n"
+                           "        console.log(event.data)\n"
+                           "    }\n"
+                           "    function initButton(){\n"
+                           "        document.getElementsByClassName('button');\n"
+                           "        document.getElementById('btn0').addEventListener('click', toggle);\n"
+                           "        document.getElementById('btn1').addEventListener('click', toggle);\n"
+                           "        document.getElementById('btn2').addEventListener('click', toggle);\n"
+                           "        document.getElementById('btn3').addEventListener('click', toggle);\n"
+                           "        document.getElementById('led0').addEventListener('click', toggleLED);\n"
+                           "        document.getElementById('led1').addEventListener('click', toggleLED);\n"
+                           "    }\n"
+                           "    function toggle(msg){\n"
+                           "        websocket.send('toggle');\n"
+                           "        console.log(msg.target.id);\n"
+                           "    }\n"
                            "\n"
+                           "    function toggleLED(msg){\n"
+                           "        //document.getElementById(msg.target.id).textContent = 'radio_button_checked';\n"
+                           "        var radioIcon = document.getElementById(msg.target.id).textContent;\n"
+                           "        if(radioIcon === 'radio_button_checked'){\n"
+                           "            document.getElementById(msg.target.id).textContent = 'radio_button_unchecked';\n"
+                           "        }\n"
+                           "        else{\n"
+                           "            document.getElementById(msg.target.id).textContent = 'radio_button_checked';\n"
+                           "        }\n"
+                           "        console.log(msg.target.id);\n"
+                           "    }\n"
                            "\n"
                            "</script>\n"
                            "</body>\n"
-                           "</html>";
+                           "</html>\n"
+                           "";
 
     esp_err_t error = httpd_resp_send(req, response, strlen(response));
 
@@ -368,84 +392,127 @@ static esp_err_t http_server_async_post_handler(httpd_req_t *req)
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
     return ESP_OK;
 }
+static void ws_async_send(void *arg)
+{
+    httpd_ws_frame_t ws_pkt;
+    struct async_resp_arg *resp_arg = arg;
+    httpd_handle_t hd = resp_arg->hd;
+    int fd = resp_arg->fd;
+
+    leds[0].state = !leds[0].state;
+    gpio_set_level(leds[0].pin_number, leds[0].state);
+
+    char buff[4];
+    memset(buff, 0, sizeof(buff));
+    sprintf(buff, "%d", leds[0].state);
+
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    ws_pkt.payload = (uint8_t *) buff;
+    ws_pkt.len = strlen(buff);
+    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+
+    static size_t max_clients = CONFIG_LWIP_MAX_LISTENING_TCP;
+    size_t fds = max_clients;
+    int client_fds[max_clients];
+
+    esp_err_t ret = httpd_get_client_list(server, &fds, client_fds);
+
+    if (ret != ESP_OK) {
+        return;
+    }
+
+    for (int i = 0; i < fds; i++) {
+        int client_info = httpd_ws_get_fd_info(server, client_fds[i]);
+        if (client_info == HTTPD_WS_CLIENT_WEBSOCKET) {
+            httpd_ws_send_frame_async(hd, client_fds[i], &ws_pkt);
+        }
+    }
+    free(resp_arg);
+}
+
+static esp_err_t trigger_async_send(httpd_handle_t handle, httpd_req_t *req)
+{
+    struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
+    resp_arg->hd = req->handle;
+    resp_arg->fd = httpd_req_to_sockfd(req);
+    return httpd_queue_work(handle, ws_async_send, resp_arg);
+}
+
+static esp_err_t handle_ws_req(httpd_req_t *req)
+{
+    static const char *TAG = "HTTP_SERVER";
+    if (req->method == HTTP_GET) {
+        ESP_LOGI(TAG, "Handshake done, the new connection was opened");
+        return ESP_OK;
+    }
+
+    httpd_ws_frame_t ws_pkt;
+    uint8_t *buf = NULL;
+    memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
+    ws_pkt.type = HTTPD_WS_TYPE_TEXT;
+    esp_err_t ret = httpd_ws_recv_frame(req, &ws_pkt, 0);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "httpd_ws_recv_frame failed to get frame len with %d", ret);
+        return ret;
+    }
+
+    if (ws_pkt.len) {
+        buf = calloc(1, ws_pkt.len + 1);
+        if (buf == NULL) {
+            ESP_LOGE(TAG, "Failed to calloc memory for buf");
+            return ESP_ERR_NO_MEM;
+        }
+        ws_pkt.payload = buf;
+        ret = httpd_ws_recv_frame(req, &ws_pkt, ws_pkt.len);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "httpd_ws_recv_frame failed with %d", ret);
+            free(buf);
+            return ret;
+        }
+        ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
+    }
+
+    ESP_LOGI(TAG, "frame len is %d", ws_pkt.len);
+
+    if (ws_pkt.type == HTTPD_WS_TYPE_TEXT &&
+        strcmp((char *) ws_pkt.payload, "toggle") == 0) {
+        free(buf);
+        return trigger_async_send(req->handle, req);
+    }
+    return ESP_OK;
+}
 
 httpd_handle_t http_server_start(void)
 {
     static const char *TAG = "HTTP_SERVER";
-    httpd_handle_t server = NULL;
+
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.lru_purge_enable = true;
 
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
+
+    // Set URI handlers
+    ESP_LOGI(TAG, "Registering URI handlers");
+    static const httpd_uri_t uri_root = {
+        .uri       = "/",
+        .method    = HTTP_GET,
+        .handler   = http_server_get_root_handler,
+        .user_ctx  = "ESP32 web server application example for control and monitor field inputs"
+    };
+    static const httpd_uri_t uri_ws_get = {
+        .uri = "/ws",           // URL added to WiFi's default gateway
+        .method = HTTP_GET,
+        .handler = handle_ws_req,
+        .user_ctx = "ESP32 WS",
+        .is_websocket = true
+    };
     if (httpd_start(&server, &config) == ESP_OK) {
-        // Set URI handlers
-        ESP_LOGI(TAG, "Registering URI handlers");
-        static const httpd_uri_t uri_root = {
-            .uri       = "/",
-            .method    = HTTP_GET,
-            .handler   = http_server_get_root_handler,
-            .user_ctx  = "ESP32 web server application example for control and monitor field inputs"
-        };
-        static const httpd_uri_t uri_ws_get = {
-            .uri = "/ws",           // URL added to WiFi's default gateway
-            .method = HTTP_GET,
-            .handler = http_server_async_get_handler,
-            .user_ctx = "ESP32 WS",
-        };
-        static const httpd_uri_t uri_ws_post = {
-            .uri = "/ws",           // URL added to WiFi's default gateway
-            .method = HTTP_POST,
-            .handler = http_server_async_post_handler,
-            .user_ctx = "ESP32 WS",
-        };
-        static const httpd_uri_t uri_led0_get = {
-            .uri = "/led0",           // URL added to WiFi's default gateway
-            .method = HTTP_GET,
-            .handler = http_server_get_led0_handler,
-            .user_ctx = "led0 toggle",
-        };
-        static const httpd_uri_t uri_led1_get = {
-            .uri = "/led1",           // URL added to WiFi's default gateway
-            .method = HTTP_GET,
-            .handler = http_server_get_led1_handler,
-            .user_ctx = "led1 toggle",
-        };
-        static const httpd_uri_t uri_push_button0_get = {
-            .uri = "/button0",           // URL added to WiFi's default gateway
-            .method = HTTP_GET,
-            .handler = http_server_get_push_button0_handler,
-            .user_ctx = "push_button0 toggle",
-        };
-        static const httpd_uri_t uri_push_button1_get = {
-            .uri = "/button1",           // URL added to WiFi's default gateway
-            .method = HTTP_GET,
-            .handler = http_server_get_push_button1_handler,
-            .user_ctx = "push_button1 toggle",
-        };
-        static const httpd_uri_t uri_push_button2_get = {
-            .uri = "/button2",           // URL added to WiFi's default gateway
-            .method = HTTP_GET,
-            .handler = http_server_get_push_button2_handler,
-            .user_ctx = "push_button2 toggle",
-        };
-        static const httpd_uri_t uri_push_button3_get = {
-            .uri = "/button3",           // URL added to WiFi's default gateway
-            .method = HTTP_GET,
-            .handler = http_server_get_push_button3_handler,
-            .user_ctx = "push_button3 toggle",
-        };
         httpd_register_uri_handler(server, &uri_root);
         httpd_register_uri_handler(server, &uri_ws_get);
-        httpd_register_uri_handler(server, &uri_ws_post);
-        httpd_register_uri_handler(server, &uri_led0_get);
-        httpd_register_uri_handler(server, &uri_led1_get);
-        httpd_register_uri_handler(server, &uri_push_button0_get);
-        httpd_register_uri_handler(server, &uri_push_button1_get);
-        httpd_register_uri_handler(server, &uri_push_button2_get);
-        httpd_register_uri_handler(server, &uri_push_button3_get);
         return server;
     }
+
     ESP_LOGI(TAG, "Error starting server!");
     return NULL;
 };

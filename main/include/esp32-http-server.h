@@ -10,7 +10,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 /** HTTP server **/
+static httpd_handle_t server = NULL;
+
 /** Asynchronous response data structure **/
 struct async_resp_arg
 {
