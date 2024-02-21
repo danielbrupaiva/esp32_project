@@ -9,6 +9,8 @@ extern "C" {
 
 static uint64_t payload_id = 0;
 
+static char *json_buffer;
+
 char *create_json_object(timestamp_t *timestamp, char *strftime_buf);
 
 void xPayload(void *arg);

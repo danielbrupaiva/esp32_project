@@ -5,90 +5,7 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 /* HTTP server */
 
-static esp_err_t http_server_get_led0_handler(httpd_req_t *req)
-{
-    static const char *TAG = "HTTP_SERVER";
-    const char *response = "Toggle LED0";
-    leds[0].state = !leds[0].state;
-    esp_err_t error = httpd_resp_send(req, response, strlen(response));
 
-    if (ESP_OK != error) {
-        ESP_LOGI(TAG, "Erro %d while sending response", error);
-        return error;
-    }
-    ESP_LOGI(TAG, "Response sent successfully");
-    return error;
-};
-static esp_err_t http_server_get_led1_handler(httpd_req_t *req)
-{
-    static const char *TAG = "HTTP_SERVER";
-    const char *response = "Toggle LED1";
-    leds[1].state = !leds[1].state;
-    esp_err_t error = httpd_resp_send(req, response, strlen(response));
-
-    if (ESP_OK != error) {
-        ESP_LOGI(TAG, "Erro %d while sending response", error);
-        return error;
-    }
-    ESP_LOGI(TAG, "Response sent successfully");
-    return error;
-};
-static esp_err_t http_server_get_push_button0_handler(httpd_req_t *req)
-{
-    static const char *TAG = "HTTP_SERVER";
-    const char *response = "Toggle push_button0 state";
-    push_buttons[0].state = !push_buttons[0].state;
-    esp_err_t error = httpd_resp_send(req, response, strlen(response));
-
-    if (ESP_OK != error) {
-        ESP_LOGI(TAG, "Erro %d while sending response", error);
-        return error;
-    }
-    ESP_LOGI(TAG, "Response sent successfully");
-    return error;
-};
-static esp_err_t http_server_get_push_button1_handler(httpd_req_t *req)
-{
-    static const char *TAG = "HTTP_SERVER";
-    const char *response = "Toggle push_button1 state";
-    push_buttons[1].state = !push_buttons[1].state;
-    esp_err_t error = httpd_resp_send(req, response, strlen(response));
-
-    if (ESP_OK != error) {
-        ESP_LOGI(TAG, "Erro %d while sending response", error);
-        return error;
-    }
-    ESP_LOGI(TAG, "Response sent successfully");
-    return error;
-};
-static esp_err_t http_server_get_push_button2_handler(httpd_req_t *req)
-{
-    static const char *TAG = "HTTP_SERVER";
-    const char *response = "Toggle push_button2 state";
-    push_buttons[2].state = !push_buttons[2].state;
-    esp_err_t error = httpd_resp_send(req, response, strlen(response));
-
-    if (ESP_OK != error) {
-        ESP_LOGI(TAG, "Erro %d while sending response", error);
-        return error;
-    }
-    ESP_LOGI(TAG, "Response sent successfully");
-    return error;
-};
-static esp_err_t http_server_get_push_button3_handler(httpd_req_t *req)
-{
-    static const char *TAG = "HTTP_SERVER";
-    const char *response = "Toggle push_button3 state";
-    push_buttons[3].state = !push_buttons[3].state;
-    esp_err_t error = httpd_resp_send(req, response, strlen(response));
-
-    if (ESP_OK != error) {
-        ESP_LOGI(TAG, "Erro %d while sending response", error);
-        return error;
-    }
-    ESP_LOGI(TAG, "Response sent successfully");
-    return error;
-};
 static esp_err_t http_server_get_root_handler(httpd_req_t *req)
 {
     static const char *TAG = "HTTP_SERVER";
@@ -298,7 +215,7 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "        document.getElementById('led1').addEventListener('click', toggleLED);\n"
                            "    }\n"
                            "    function toggle(msg){\n"
-                           "        websocket.send('toggle');\n"
+                           "        websocket.send(msg.target.id);\n"
                            "        console.log(msg.target.id);\n"
                            "    }\n"
                            "\n"
@@ -311,6 +228,7 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "        else{\n"
                            "            document.getElementById(msg.target.id).textContent = 'radio_button_checked';\n"
                            "        }\n"
+                           "        websocket.send(msg.target.id);\n"
                            "        console.log(msg.target.id);\n"
                            "    }\n"
                            "\n"
@@ -340,7 +258,6 @@ static void generate_async_resp(void *arg)
     strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timestamp.timeinfo);
 
     char *data_string = create_json_object(&timestamp, strftime_buf);
-//    char *data_string = "Hello from ESP32 websocket server ...";
     sprintf(http_string, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n", strlen(data_string));
 
     // Initialize asynchronous response data structure
@@ -352,7 +269,7 @@ static void generate_async_resp(void *arg)
     ESP_LOGI(TAG, "Executing queued work fd : %d", fd);
     httpd_socket_send(hd, fd, http_string, strlen(http_string), 0);
     httpd_socket_send(hd, fd, data_string, strlen(data_string), 0);
-
+    free(data_string);
     free(arg);
 }
 
@@ -392,6 +309,7 @@ static esp_err_t http_server_async_post_handler(httpd_req_t *req)
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
     return ESP_OK;
 }
+
 static void ws_async_send(void *arg)
 {
     httpd_ws_frame_t ws_pkt;
@@ -399,16 +317,15 @@ static void ws_async_send(void *arg)
     httpd_handle_t hd = resp_arg->hd;
     int fd = resp_arg->fd;
 
-    leds[0].state = !leds[0].state;
-    gpio_set_level(leds[0].pin_number, leds[0].state);
-
-    char buff[4];
-    memset(buff, 0, sizeof(buff));
-    sprintf(buff, "%d", leds[0].state);
+//  Get JSON to return client
+    timestamp_t timestamp = get_timestamp();
+    char strftime_buf[120];
+    strftime(strftime_buf, sizeof(strftime_buf), "%Y-%m-%d %H:%M:%S", &timestamp.timeinfo);
+    char *data_string = create_json_object(&timestamp, strftime_buf);
 
     memset(&ws_pkt, 0, sizeof(httpd_ws_frame_t));
-    ws_pkt.payload = (uint8_t *) buff;
-    ws_pkt.len = strlen(buff);
+    ws_pkt.payload = (uint8_t *) data_string;
+    ws_pkt.len = strlen(data_string);
     ws_pkt.type = HTTPD_WS_TYPE_TEXT;
 
     static size_t max_clients = CONFIG_LWIP_MAX_LISTENING_TCP;
@@ -427,6 +344,7 @@ static void ws_async_send(void *arg)
             httpd_ws_send_frame_async(hd, client_fds[i], &ws_pkt);
         }
     }
+    free(data_string);
     free(resp_arg);
 }
 
@@ -470,12 +388,15 @@ static esp_err_t handle_ws_req(httpd_req_t *req)
             return ret;
         }
         ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
+
     }
 
-    ESP_LOGI(TAG, "frame len is %d", ws_pkt.len);
+//    ESP_LOGI(TAG, "frame len is %d", ws_pkt.len);
+
+    /* Treat payload recieved*/
 
     if (ws_pkt.type == HTTPD_WS_TYPE_TEXT &&
-        strcmp((char *) ws_pkt.payload, "toggle") == 0) {
+        strcmp((char *) ws_pkt.payload, "led0") == 0) {
         free(buf);
         return trigger_async_send(req->handle, req);
     }
@@ -510,6 +431,7 @@ httpd_handle_t http_server_start(void)
     if (httpd_start(&server, &config) == ESP_OK) {
         httpd_register_uri_handler(server, &uri_root);
         httpd_register_uri_handler(server, &uri_ws_get);
+        httpd_register_err_handler(server, HTTPD_404_NOT_FOUND, &http_server_404_error_handler);
         return server;
     }
 
@@ -517,11 +439,11 @@ httpd_handle_t http_server_start(void)
     return NULL;
 };
 
-static void http_server_stop(httpd_handle_t server)
+void http_server_stop(httpd_handle_t *server)
 {
     static const char *TAG = "HTTP_SERVER";
     // Stop the httpd server
-    httpd_stop(server);
+    httpd_stop(&server);
     ESP_LOGI(TAG, "Server stop!");
 };
 

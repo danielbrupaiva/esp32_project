@@ -123,9 +123,10 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
             esp_wifi_connect();
             break;
         case WIFI_EVENT_STA_STOP:                 /* ESP32 station stop */
+            http_server_stop(server);
             break;
         case WIFI_EVENT_STA_CONNECTED:            /* ESP32 station connected to AP */
-            http_server_start();
+            server = http_server_start();
             break;
         case WIFI_EVENT_STA_DISCONNECTED:         /* ESP32 station disconnected from AP */
             if (s_connection_retries < ESP_MAXIMUM_RETRY) {

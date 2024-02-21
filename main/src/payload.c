@@ -109,7 +109,7 @@ void xPayload(void *arg)
 {
     static const char *TAG = "Payload";
 
-    //initialize_sntp();
+    initialize_sntp();
 
     for (;;) {
 
@@ -121,5 +121,6 @@ void xPayload(void *arg)
 
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
+    free(json_buffer);
     vTaskDelete(NULL);
 }

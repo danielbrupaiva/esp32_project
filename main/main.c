@@ -69,12 +69,7 @@ void app_main(void)
         return;
     }
 
-    if (pdTRUE != xTaskCreate(xTimeStamp, "Task TimeStamp", configMINIMAL_STACK_SIZE + 2048, NULL, 1, NULL)) {
-        ESP_LOGI(TAG, "error - nao foi possivel alocar Task TimeStamp.");
-        return;
-    }
-
-    if (xTaskCreate(xPayload, "Task MQTTPublish", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL) != pdTRUE) {
+    if (xTaskCreate(xPayload, "Task xPayload", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL) != pdTRUE) {
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task xPayload.");
         return;
     }
