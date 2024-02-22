@@ -68,9 +68,10 @@ void app_main(void)
         ESP_LOGI(TAG, "error - nao foi possivel alocar Task MPU6050.");
         return;
     }
-
-    if (xTaskCreate(xPayload, "Task xPayload", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL) != pdTRUE) {
-        ESP_LOGI(TAG, "error - nao foi possivel alocar Task xPayload.");
-        return;
-    }
+    initialize_sntp();
+//
+//    if (xTaskCreate(xPayload, "Task xPayload", configMINIMAL_STACK_SIZE + 2048, NULL, 0, NULL) != pdTRUE) {
+//        ESP_LOGI(TAG, "error - nao foi possivel alocar Task xPayload.");
+//        return;
+//    }
 }

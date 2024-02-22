@@ -121,10 +121,10 @@
     <h2>GPIO</a></h2>
     <p>Push buttons [ON/OFF]</p>
     <div class="buttons-container">
-        <button id="btn0" class="btn" type="button">BTN0</button>
-        <button id="btn1" class="btn" type="button">BTN1</button>
-        <button id="btn2" class="btn" type="button">BTN2</button>
-        <button id="btn3" class="btn" type="button">BTN3</button>
+        <button id="btn0" class="btn" type="button">BTN0<br>OFF</button>
+        <button id="btn1" class="btn" type="button">BTN1<br>OFF</button>
+        <button id="btn2" class="btn" type="button">BTN2<br>OFF</button>
+        <button id="btn3" class="btn" type="button">BTN3<br>OFF</button>
         <hr>
     </div>
 
@@ -141,22 +141,22 @@
     <hr>
 <div id="adc_sensors" class="adc_sensors">
     <h2>Analog sensor</h2>
-    <p>Analog input sensor [0-5V]: <b>100.0%</b></p>
+    <p>Analog input sensor [0-5V]: <b id="adc_value">100.0%</b></p>
     <hr>
 </div>
 <div id="i2c" class="i2c">
     <h2>MPU6050 accel/gyro module</h2>
     <p>MPU6050 module as I2C communication example</p>
     <div id="accel" >
-        <p>axis_x : <b>12.34</b></p>
-        <p>axis_y : <b>12.34</b></p>
-        <p>axis_z : <b>12.34</b></p>
+        <p>axis_x : <b id="accel_x">12.34</b></p>
+        <p>axis_y : <b id="accel_y">12.34</b></p>
+        <p>axis_z : <b id="accel_z">12.34</b></p>
     </div>
     <br>
     <div id="gyro">
-        <p>gyro_x : <b>12.34</b></p>
-        <p>gyro_y : <b>12.34</b></p>
-        <p>gyro_z : <b>12.34</b></p>
+        <p>axis_x : <b id="gyro_x">12.34</b></p>
+        <p>axis_y : <b id="gyro_y">12.34</b></p>
+        <p>axis_z : <b id="gyro_z">12.34</b></p>
     </div>
 
     <hr>
@@ -192,19 +192,62 @@
         setTimeout(initWebSocket, 2000);
     }
     function onMessage(event){
-        console.log(event.data)
+        console.log("data received");
+        const data = JSON.parse(event.data);
+
+        console.log("led0: " + data["esp32-webserver"].leds[0].value);
+        var id = 0;
+        if(document.getElementById("led"+id).textContent === 'radio_button_checked' && data["esp32-webserver"].leds[id].value === false){
+            document.getElementById("led"+id).textContent = 'radio_button_unchecked';
+        }
+        else if(document.getElementById("led"+id).textContent === 'radio_button_unchecked' && data["esp32-webserver"].leds[id].value === true){
+            document.getElementById("led"+id).textContent = 'radio_button_checked';
+        }
+        console.log("led1: " + data["esp32-webserver"].leds[1].value);
+        var id = 1;
+        if(document.getElementById("led"+id).textContent === 'radio_button_checked' && data["esp32-webserver"].leds[id].value === false){
+            document.getElementById("led"+id).textContent = 'radio_button_unchecked';
+        }
+        else if(document.getElementById("led"+id).textContent === 'radio_button_unchecked' && data["esp32-webserver"].leds[id].value === true){
+            document.getElementById("led"+id).textContent = 'radio_button_checked';
+        }
+
+        console.log("btn0: " + data["esp32-webserver"].push_buttons[0].value);
+        document.getElementById("btn0").innerHTML = data["esp32-webserver"].push_buttons[0].value ? 'BTN0<br>ON' : 'BTN0<br>OFF';
+        console.log("btn1: " + data["esp32-webserver"].push_buttons[1].value);
+        document.getElementById("btn1").innerHTML = data["esp32-webserver"].push_buttons[1].value ? 'BTN1<br>ON' : 'BTN1<br>OFF';
+        console.log("btn2: " + data["esp32-webserver"].push_buttons[2].value);
+        document.getElementById("btn2").innerHTML = data["esp32-webserver"].push_buttons[2].value ? 'BTN2<br>ON' : 'BTN2<br>OFF';
+        console.log("btn3: " + data["esp32-webserver"].push_buttons[3].value);
+        document.getElementById("btn3").innerHTML = data["esp32-webserver"].push_buttons[3].value ? 'BTN3<br>ON' : 'BTN3<br>OFF';
+
+        console.log(data["esp32-webserver"].adc_sensors[0].value);
+        document.getElementById("adc_value").innerHTML = parseFloat(data["esp32-webserver"].adc_sensors[0].value).toFixed(2);
+
+        console.log("mpu6050.accel.x: " + data["esp32-webserver"].mpu6050.accel.x);
+        document.getElementById("accel_x").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.accel.x).toFixed(2);
+        console.log("mpu6050.accel.y: " + data["esp32-webserver"].mpu6050.accel.y);
+        document.getElementById("accel_y").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.accel.y).toFixed(2);
+        console.log("mpu6050.accel.z: " + data["esp32-webserver"].mpu6050.accel.z);
+        document.getElementById("accel_z").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.accel.z).toFixed(2);
+
+        console.log("mpu6050.gyro.x: " + data["esp32-webserver"].mpu6050.gyro.x);
+        document.getElementById("gyro_x").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.gyro.x).toFixed(2);
+        console.log("mpu6050.gyro.y: " + data["esp32-webserver"].mpu6050.gyro.y);
+        document.getElementById("gyro_y").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.gyro.y).toFixed(2);
+        console.log("mpu6050.gyro.z: " + data["esp32-webserver"].mpu6050.gyro.z);
+        document.getElementById("gyro_z").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.gyro.z).toFixed(2);
     }
     function initButton(){
-        document.getElementsByClassName('button');
         document.getElementById('btn0').addEventListener('click', toggle);
         document.getElementById('btn1').addEventListener('click', toggle);
         document.getElementById('btn2').addEventListener('click', toggle);
         document.getElementById('btn3').addEventListener('click', toggle);
-        document.getElementById('led0').addEventListener('click', toggleLED);
-        document.getElementById('led1').addEventListener('click', toggleLED);
+        document.getElementById('led0').addEventListener('click', toggle);
+        document.getElementById('led1').addEventListener('click', toggle);
     }
     function toggle(msg){
-        websocket.send('toggle');
+        websocket.send(msg.target.id);
         console.log(msg.target.id);
     }
     function toggleLED(msg){
@@ -216,9 +259,9 @@
         else{
             document.getElementById(msg.target.id).textContent = 'radio_button_checked';
         }
+        websocket.send(msg.target.id);
         console.log(msg.target.id);
     }
-
 </script>
 </body>
 </html>

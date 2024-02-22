@@ -5,7 +5,6 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 /* HTTP server */
 
-
 static esp_err_t http_server_get_root_handler(httpd_req_t *req)
 {
     static const char *TAG = "HTTP_SERVER";
@@ -132,10 +131,10 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "    <h2>GPIO</a></h2>\n"
                            "    <p>Push buttons [ON/OFF]</p>\n"
                            "    <div class=\"buttons-container\">\n"
-                           "        <button id=\"btn0\" class=\"btn\" type=\"button\">BTN0</button>\n"
-                           "        <button id=\"btn1\" class=\"btn\" type=\"button\">BTN1</button>\n"
-                           "        <button id=\"btn2\" class=\"btn\" type=\"button\">BTN2</button>\n"
-                           "        <button id=\"btn3\" class=\"btn\" type=\"button\">BTN3</button>\n"
+                           "        <button id=\"btn0\" class=\"btn\" type=\"button\">BTN0<br>OFF</button>\n"
+                           "        <button id=\"btn1\" class=\"btn\" type=\"button\">BTN1<br>OFF</button>\n"
+                           "        <button id=\"btn2\" class=\"btn\" type=\"button\">BTN2<br>OFF</button>\n"
+                           "        <button id=\"btn3\" class=\"btn\" type=\"button\">BTN3<br>OFF</button>\n"
                            "        <hr>\n"
                            "    </div>\n"
                            "\n"
@@ -152,22 +151,22 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "    <hr>\n"
                            "<div id=\"adc_sensors\" class=\"adc_sensors\">\n"
                            "    <h2>Analog sensor</h2>\n"
-                           "    <p>Analog input sensor [0-5V]: <b>100.0%</b></p>\n"
+                           "    <p>Analog input sensor [0-5V]: <b id=\"adc_value\">100.0%</b></p>\n"
                            "    <hr>\n"
                            "</div>\n"
                            "<div id=\"i2c\" class=\"i2c\">\n"
                            "    <h2>MPU6050 accel/gyro module</h2>\n"
                            "    <p>MPU6050 module as I2C communication example</p>\n"
                            "    <div id=\"accel\" >\n"
-                           "        <p>axis_x : <b>12.34</b></p>\n"
-                           "        <p>axis_y : <b>12.34</b></p>\n"
-                           "        <p>axis_z : <b>12.34</b></p>\n"
+                           "        <p>axis_x : <b id=\"accel_x\">12.34</b></p>\n"
+                           "        <p>axis_y : <b id=\"accel_y\">12.34</b></p>\n"
+                           "        <p>axis_z : <b id=\"accel_z\">12.34</b></p>\n"
                            "    </div>\n"
                            "    <br>\n"
                            "    <div id=\"gyro\">\n"
-                           "        <p>gyro_x : <b>12.34</b></p>\n"
-                           "        <p>gyro_y : <b>12.34</b></p>\n"
-                           "        <p>gyro_z : <b>12.34</b></p>\n"
+                           "        <p>axis_x : <b id=\"gyro_x\">12.34</b></p>\n"
+                           "        <p>axis_y : <b id=\"gyro_y\">12.34</b></p>\n"
+                           "        <p>axis_z : <b id=\"gyro_z\">12.34</b></p>\n"
                            "    </div>\n"
                            "\n"
                            "    <hr>\n"
@@ -203,22 +202,64 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "        setTimeout(initWebSocket, 2000);\n"
                            "    }\n"
                            "    function onMessage(event){\n"
-                           "        console.log(event.data)\n"
+                           "        console.log(\"data received\");\n"
+                           "        const data = JSON.parse(event.data);\n"
+                           "\n"
+                           "        console.log(\"led0: \" + data[\"esp32-webserver\"].leds[0].value);\n"
+                           "        var id = 0;\n"
+                           "        if(document.getElementById(\"led\"+id).textContent === 'radio_button_checked' && data[\"esp32-webserver\"].leds[id].value === false){\n"
+                           "            document.getElementById(\"led\"+id).textContent = 'radio_button_unchecked';\n"
+                           "        }\n"
+                           "        else if(document.getElementById(\"led\"+id).textContent === 'radio_button_unchecked' && data[\"esp32-webserver\"].leds[id].value === true){\n"
+                           "            document.getElementById(\"led\"+id).textContent = 'radio_button_checked';\n"
+                           "        }\n"
+                           "        console.log(\"led1: \" + data[\"esp32-webserver\"].leds[1].value);\n"
+                           "        var id = 1;\n"
+                           "        if(document.getElementById(\"led\"+id).textContent === 'radio_button_checked' && data[\"esp32-webserver\"].leds[id].value === false){\n"
+                           "            document.getElementById(\"led\"+id).textContent = 'radio_button_unchecked';\n"
+                           "        }\n"
+                           "        else if(document.getElementById(\"led\"+id).textContent === 'radio_button_unchecked' && data[\"esp32-webserver\"].leds[id].value === true){\n"
+                           "            document.getElementById(\"led\"+id).textContent = 'radio_button_checked';\n"
+                           "        }\n"
+                           "\n"
+                           "        console.log(\"btn0: \" + data[\"esp32-webserver\"].push_buttons[0].value);\n"
+                           "        document.getElementById(\"btn0\").innerHTML = data[\"esp32-webserver\"].push_buttons[0].value ? 'BTN0<br>ON' : 'BTN0<br>OFF';\n"
+                           "        console.log(\"btn1: \" + data[\"esp32-webserver\"].push_buttons[1].value);\n"
+                           "        document.getElementById(\"btn1\").innerHTML = data[\"esp32-webserver\"].push_buttons[1].value ? 'BTN1<br>ON' : 'BTN1<br>OFF';\n"
+                           "        console.log(\"btn2: \" + data[\"esp32-webserver\"].push_buttons[2].value);\n"
+                           "        document.getElementById(\"btn2\").innerHTML = data[\"esp32-webserver\"].push_buttons[2].value ? 'BTN2<br>ON' : 'BTN2<br>OFF';\n"
+                           "        console.log(\"btn3: \" + data[\"esp32-webserver\"].push_buttons[3].value);\n"
+                           "        document.getElementById(\"btn3\").innerHTML = data[\"esp32-webserver\"].push_buttons[3].value ? 'BTN3<br>ON' : 'BTN3<br>OFF';\n"
+                           "\n"
+                           "        console.log(data[\"esp32-webserver\"].adc_sensors[0].value);\n"
+                           "        document.getElementById(\"adc_value\").innerHTML = parseFloat(data[\"esp32-webserver\"].adc_sensors[0].value).toFixed(2);\n"
+                           "\n"
+                           "        console.log(\"mpu6050.accel.x: \" + data[\"esp32-webserver\"].mpu6050.accel.x);\n"
+                           "        document.getElementById(\"accel_x\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.accel.x).toFixed(2);\n"
+                           "        console.log(\"mpu6050.accel.y: \" + data[\"esp32-webserver\"].mpu6050.accel.y);\n"
+                           "        document.getElementById(\"accel_y\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.accel.y).toFixed(2);\n"
+                           "        console.log(\"mpu6050.accel.z: \" + data[\"esp32-webserver\"].mpu6050.accel.z);\n"
+                           "        document.getElementById(\"accel_z\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.accel.z).toFixed(2);\n"
+                           "\n"
+                           "        console.log(\"mpu6050.gyro.x: \" + data[\"esp32-webserver\"].mpu6050.gyro.x);\n"
+                           "        document.getElementById(\"gyro_x\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.gyro.x).toFixed(2);\n"
+                           "        console.log(\"mpu6050.gyro.y: \" + data[\"esp32-webserver\"].mpu6050.gyro.y);\n"
+                           "        document.getElementById(\"gyro_y\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.gyro.y).toFixed(2);\n"
+                           "        console.log(\"mpu6050.gyro.z: \" + data[\"esp32-webserver\"].mpu6050.gyro.z);\n"
+                           "        document.getElementById(\"gyro_z\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.gyro.z).toFixed(2);\n"
                            "    }\n"
                            "    function initButton(){\n"
-                           "        document.getElementsByClassName('button');\n"
                            "        document.getElementById('btn0').addEventListener('click', toggle);\n"
                            "        document.getElementById('btn1').addEventListener('click', toggle);\n"
                            "        document.getElementById('btn2').addEventListener('click', toggle);\n"
                            "        document.getElementById('btn3').addEventListener('click', toggle);\n"
-                           "        document.getElementById('led0').addEventListener('click', toggleLED);\n"
-                           "        document.getElementById('led1').addEventListener('click', toggleLED);\n"
+                           "        document.getElementById('led0').addEventListener('click', toggle);\n"
+                           "        document.getElementById('led1').addEventListener('click', toggle);\n"
                            "    }\n"
                            "    function toggle(msg){\n"
                            "        websocket.send(msg.target.id);\n"
                            "        console.log(msg.target.id);\n"
                            "    }\n"
-                           "\n"
                            "    function toggleLED(msg){\n"
                            "        //document.getElementById(msg.target.id).textContent = 'radio_button_checked';\n"
                            "        var radioIcon = document.getElementById(msg.target.id).textContent;\n"
@@ -231,7 +272,6 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "        websocket.send(msg.target.id);\n"
                            "        console.log(msg.target.id);\n"
                            "    }\n"
-                           "\n"
                            "</script>\n"
                            "</body>\n"
                            "</html>\n"
@@ -388,15 +428,13 @@ static esp_err_t handle_ws_req(httpd_req_t *req)
             return ret;
         }
         ESP_LOGI(TAG, "Got packet with message: %s", ws_pkt.payload);
-
     }
 
 //    ESP_LOGI(TAG, "frame len is %d", ws_pkt.len);
 
-    /* Treat payload recieved*/
-
-    if (ws_pkt.type == HTTPD_WS_TYPE_TEXT &&
-        strcmp((char *) ws_pkt.payload, "led0") == 0) {
+    /* Treat payload received*/
+    if (ws_pkt.type == HTTPD_WS_TYPE_TEXT) {
+        treat_payload(&ws_pkt);
         free(buf);
         return trigger_async_send(req->handle, req);
     }
@@ -405,6 +443,7 @@ static esp_err_t handle_ws_req(httpd_req_t *req)
 
 httpd_handle_t http_server_start(void)
 {
+
     static const char *TAG = "HTTP_SERVER";
 
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
@@ -428,9 +467,18 @@ httpd_handle_t http_server_start(void)
         .user_ctx = "ESP32 WS",
         .is_websocket = true
     };
+    static const httpd_uri_t uri_ws_data_get = {
+        .uri = "/ws/data",           // URL added to WiFi's default gateway
+        .method = HTTP_GET,
+        .handler = http_server_async_get_handler,
+        .user_ctx = "ESP32 JSON DATA",
+        .is_websocket = true
+    };
+
     if (httpd_start(&server, &config) == ESP_OK) {
         httpd_register_uri_handler(server, &uri_root);
         httpd_register_uri_handler(server, &uri_ws_get);
+        httpd_register_uri_handler(server, &uri_ws_data_get);
         httpd_register_err_handler(server, HTTPD_404_NOT_FOUND, &http_server_404_error_handler);
         return server;
     }
@@ -477,3 +525,26 @@ static esp_err_t http_server_404_error_handler(httpd_req_t *req, httpd_err_code_
     return ESP_FAIL;
 };
 
+static esp_err_t treat_payload(httpd_ws_frame_t *ws_pkt)
+{
+    if (strcmp((char *) ws_pkt->payload, "btn0") == 0) {
+        push_buttons[0].state = !push_buttons[0].state;
+    }
+    else if (strcmp((char *) ws_pkt->payload, "btn1") == 0) {
+        push_buttons[1].state = !push_buttons[1].state;
+    }
+    else if (strcmp((char *) ws_pkt->payload, "btn2") == 0) {
+        push_buttons[2].state = !push_buttons[2].state;
+    }
+    else if (strcmp((char *) ws_pkt->payload, "btn3") == 0) {
+        push_buttons[3].state = !push_buttons[3].state;
+    }
+    else if (strcmp((char *) ws_pkt->payload, "led0") == 0) {
+        leds[0].state = !leds[0].state;
+    }
+    else if (strcmp((char *) ws_pkt->payload, "led1") == 0) {
+        leds[1].state = !leds[1].state;
+    }
+
+    return ESP_OK;
+}

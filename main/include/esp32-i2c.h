@@ -3,8 +3,8 @@
 #include "esp32-defines.h"
 
 // i2c
-#define I2C_SDA GPIO_NUM_12
-#define I2C_SCL GPIO_NUM_14
+#define I2C_SDA GPIO_NUM_27
+#define I2C_SCL GPIO_NUM_26
 
 #ifdef __cplusplus
 extern "C" {

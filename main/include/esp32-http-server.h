@@ -28,6 +28,8 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req);
 static esp_err_t http_server_async_get_handler(httpd_req_t *req);
 static esp_err_t http_server_404_error_handler(httpd_req_t *req, httpd_err_code_t err);
 
+static esp_err_t treat_payload(httpd_ws_frame_t *ws_pkt);
+
 #ifdef __cplusplus
 }
 #endif
