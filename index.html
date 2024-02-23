@@ -7,15 +7,23 @@
     <div id="top">
         <img class="logo" src="https://www.sp.senai.br/images/senai.svg" alt="logo">
         <h1>ESP32 WebServer application</h1>
-        <h2>Author: Daniel Paiva</h2>
         <h>WebServer aplication using ESP32 for remotely control and monitoring sensors at field</h>
         <hr>
-
     </div>
     <!-- Add icon library -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <style>
+        .logo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensure the entire area is covered */
+        }
+        .esp32 {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensure the entire area is covered */
+        }
         .led{
             position: relative;
             display: inline-grid;
@@ -33,13 +41,12 @@
             position: relative;
             display: inline-grid;
             margin: 20px 10px;
-            padding: 24px;
+            padding: 48px;
 
             overflow: hidden;
             cursor: pointer;
             border: none;
             border-radius: 2px;
-            outline: none;
 
             box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
 
@@ -86,19 +93,16 @@
             position: relative;
             top: 0%;
             left: 0%;
-
             /*-webkit-transform: translate(-50%, -50%);*/
             /*-moz-transform: translate(-50%, -50%);*/
             /*-ms-transform: translate(-50%, -50%);*/
             /*-o-transform: translate(-50%, -50%);*/
             /*transform: translate(-50%, -50%);*/
-
             background-color: #ecf0f1;
             color: #34495e;
             font-family: Trebuchet, Arial, sans-serif;
             text-align: center;
         }
-
         .success {background-color: #04AA6D;} /* Green */
         .success:hover {background-color: #46a049;}
         .info {background-color: #2196F3;} /* Blue */
@@ -109,14 +113,18 @@
         .danger:hover {background: #da190b;}
         .default {background-color: #e7e7e7; color: black;} /* Gray */
         .default:hover {background: #ddd;}
-
         .material-icons {
             vertical-align: middle;
         }
-
     </style>
 </head>
 <body>
+<!--<img class="esp32" src="https://docs.espressif.com/projects/esp-idf/en/stable/esp32/_images/esp32-devkitC-v4-pinout.png" alt="esp32">-->
+<!--<img class="esp32" src="https://www.espressif.com/sites/default/files/modules/ESP32-WROOM-32E%20L_0.png" alt="esp32">-->
+<a href="https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html">
+    <img class="esp32" src="https://docs.espressif.com/projects/esp-idf/en/stable/esp32/_images/esp32-devkitC-v4-pinout.png" alt="ESP32 Devkit-C Pinout">
+</a>
+<hr>
 <div id="gpios" class="gpios">
     <h2>GPIO</a></h2>
     <p>Push buttons [ON/OFF]</p>
@@ -127,14 +135,13 @@
         <button id="btn3" class="btn" type="button">BTN3<br>OFF</button>
         <hr>
     </div>
-
     <div class="leds-container">
     <p>LEDs</p>
         <button class="led">LED0
-            <span id="led0" class="material-icons">radio_button_unchecked</span>
+            <span id="led0" class="material-icons" style="font-size: 36px">radio_button_unchecked</span>
         </button>
         <button class="led">LED1
-            <span id="led1" class="material-icons">radio_button_unchecked</span>
+            <span id="led1" class="material-icons" style="font-size: 36px">radio_button_unchecked</span>
         </button>
     </div>
 </div>
@@ -158,10 +165,8 @@
         <p>axis_y : <b id="gyro_y">12.34</b></p>
         <p>axis_z : <b id="gyro_z">12.34</b></p>
     </div>
-
     <hr>
 </div>
-
 <footer>
     <a href="#top">HOME</a>
     <a href="#gpios">GPIOs</a>
@@ -194,7 +199,6 @@
     function onMessage(event){
         console.log("data received");
         const data = JSON.parse(event.data);
-
         console.log("led0: " + data["esp32-webserver"].leds[0].value);
         var id = 0;
         if(document.getElementById("led"+id).textContent === 'radio_button_checked' && data["esp32-webserver"].leds[id].value === false){
@@ -211,7 +215,6 @@
         else if(document.getElementById("led"+id).textContent === 'radio_button_unchecked' && data["esp32-webserver"].leds[id].value === true){
             document.getElementById("led"+id).textContent = 'radio_button_checked';
         }
-
         console.log("btn0: " + data["esp32-webserver"].push_buttons[0].value);
         document.getElementById("btn0").innerHTML = data["esp32-webserver"].push_buttons[0].value ? 'BTN0<br>ON' : 'BTN0<br>OFF';
         console.log("btn1: " + data["esp32-webserver"].push_buttons[1].value);
@@ -220,17 +223,14 @@
         document.getElementById("btn2").innerHTML = data["esp32-webserver"].push_buttons[2].value ? 'BTN2<br>ON' : 'BTN2<br>OFF';
         console.log("btn3: " + data["esp32-webserver"].push_buttons[3].value);
         document.getElementById("btn3").innerHTML = data["esp32-webserver"].push_buttons[3].value ? 'BTN3<br>ON' : 'BTN3<br>OFF';
-
         console.log(data["esp32-webserver"].adc_sensors[0].value);
         document.getElementById("adc_value").innerHTML = parseFloat(data["esp32-webserver"].adc_sensors[0].value).toFixed(2);
-
         console.log("mpu6050.accel.x: " + data["esp32-webserver"].mpu6050.accel.x);
         document.getElementById("accel_x").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.accel.x).toFixed(2);
         console.log("mpu6050.accel.y: " + data["esp32-webserver"].mpu6050.accel.y);
         document.getElementById("accel_y").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.accel.y).toFixed(2);
         console.log("mpu6050.accel.z: " + data["esp32-webserver"].mpu6050.accel.z);
         document.getElementById("accel_z").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.accel.z).toFixed(2);
-
         console.log("mpu6050.gyro.x: " + data["esp32-webserver"].mpu6050.gyro.x);
         document.getElementById("gyro_x").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.gyro.x).toFixed(2);
         console.log("mpu6050.gyro.y: " + data["esp32-webserver"].mpu6050.gyro.y);
