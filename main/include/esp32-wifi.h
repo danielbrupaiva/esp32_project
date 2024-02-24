@@ -39,6 +39,23 @@ static EventGroupHandle_t wifi_event_group;
 extern "C" {
 #endif
 
+static const wifi_config_t wifi_config = {
+    .ap = {
+        .ssid = ESP_WIFI_SSID,
+        .ssid_len = strlen(ESP_WIFI_SSID),
+        .channel = ESP_WIFI_CHANNEL,
+        .password = ESP_WIFI_PASS,
+        .max_connection = ESP_MAX_STA_CONN,
+        .authmode = WIFI_AUTH_WPA_WPA2_PSK
+    },
+    .sta = {
+        .ssid = ESP_WIFI_SSID,
+        .password = ESP_WIFI_PASS,
+        .threshold.authmode = ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD,
+        .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
+    }
+};
+
 /* Numbers of retries STA mode */
 static int s_connection_retries = 0;
 

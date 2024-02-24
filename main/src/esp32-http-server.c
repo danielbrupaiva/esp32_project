@@ -129,7 +129,11 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "    </style>\n"
                            "</head>\n"
                            "<body>\n"
-                           "<img class=\"esp32\" src=\"https://docs.espressif.com/projects/esp-idf/en/stable/esp32/_images/esp32-devkitC-v4-pinout.png\" alt=\"esp32\">\n"
+                           "<!--<img class=\"esp32\" src=\"https://docs.espressif.com/projects/esp-idf/en/stable/esp32/_images/esp32-devkitC-v4-pinout.png\" alt=\"esp32\">-->\n"
+                           "<!--<img class=\"esp32\" src=\"https://www.espressif.com/sites/default/files/modules/ESP32-WROOM-32E%20L_0.png\" alt=\"esp32\">-->\n"
+                           "<a href=\"https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html\">\n"
+                           "    <img class=\"esp32\" src=\"https://docs.espressif.com/projects/esp-idf/en/stable/esp32/_images/esp32-devkitC-v4-pinout.png\" alt=\"ESP32 Devkit-C Pinout\">\n"
+                           "</a>\n"
                            "<hr>\n"
                            "<div id=\"gpios\" class=\"gpios\">\n"
                            "    <h2>GPIO</a></h2>\n"
@@ -244,6 +248,7 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
                            "        console.log(\"mpu6050.gyro.z: \" + data[\"esp32-webserver\"].mpu6050.gyro.z);\n"
                            "        document.getElementById(\"gyro_z\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.gyro.z).toFixed(2);\n"
                            "    }\n"
+                           "    setInterval(()=>{websocket.send(\"/ws/data\") },1000)\n"
                            "    function initButton(){\n"
                            "        document.getElementById('btn0').addEventListener('click', toggle);\n"
                            "        document.getElementById('btn1').addEventListener('click', toggle);\n"
@@ -439,12 +444,9 @@ static esp_err_t handle_ws_req(httpd_req_t *req)
 
 httpd_handle_t http_server_start(void)
 {
-
     static const char *TAG = "HTTP_SERVER";
-
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.lru_purge_enable = true;
-
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
 
@@ -470,7 +472,6 @@ httpd_handle_t http_server_start(void)
         .user_ctx = "ESP32 JSON DATA",
         .is_websocket = true
     };
-
     if (httpd_start(&server, &config) == ESP_OK) {
         httpd_register_uri_handler(server, &uri_root);
         httpd_register_uri_handler(server, &uri_ws_get);
@@ -478,7 +479,6 @@ httpd_handle_t http_server_start(void)
         httpd_register_err_handler(server, HTTPD_404_NOT_FOUND, &http_server_404_error_handler);
         return server;
     }
-
     ESP_LOGI(TAG, "Error starting server!");
     return NULL;
 };

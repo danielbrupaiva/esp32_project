@@ -238,6 +238,7 @@
         console.log("mpu6050.gyro.z: " + data["esp32-webserver"].mpu6050.gyro.z);
         document.getElementById("gyro_z").innerHTML = parseFloat(data["esp32-webserver"].mpu6050.gyro.z).toFixed(2);
     }
+    setInterval(()=>{websocket.send("/ws/data") },1000)
     function initButton(){
         document.getElementById('btn0').addEventListener('click', toggle);
         document.getElementById('btn1').addEventListener('click', toggle);
