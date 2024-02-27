@@ -4,6 +4,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+static const char *TAG = "ADC";
+
 extern uint32_t acquisition_time_ms;
 
 volatile adc_t adc_sensors[1] = {
@@ -27,7 +29,6 @@ float get_adc_sensor_value()
 
 void xADC(void *arg)
 {
-    static const char *TAG = "ADC";
     configure_adc();
     ESP_LOGI(TAG, " configuration done!");
     for (;;) {

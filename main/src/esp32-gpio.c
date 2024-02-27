@@ -5,6 +5,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
+static const char *TAG = "GPIO";
+
 volatile gpio_t leds[2] = {
     {
         .pin_number = DIGITAL_OUTPUT_0,
@@ -49,7 +51,6 @@ volatile gpio_t push_buttons[4] = {
 
 void xLED(void *arg)
 {
-    static const char *TAG = "GPIO";
     // configure output port
     gpio_config_t output_conf = {
         .intr_type = GPIO_INTR_DISABLE,        // disable interrupt
@@ -78,7 +79,6 @@ void IRAM_ATTR gpio_isr_handler(void *arg)
 
 void xButton(void *arg)
 {
-    static const char *TAG = "GPIO";
     // create a queue to handle gpio event from isr before install isr
     gpio_evt_queue = xQueueCreate(10, sizeof(int));
 
@@ -126,7 +126,6 @@ void debounce(uint32_t _pin_number, uint32_t _debounce_time, void (*pfHandler)(v
 
 void button_0_cb(void)
 {
-    static const char *TAG = "GPIO";
     static uint32_t counter = 0;
     ++counter;
     ESP_LOGI(TAG, "Button 0 pressed %d times", counter);
@@ -137,7 +136,6 @@ void button_0_cb(void)
 
 void button_1_cb(void)
 {
-    static const char *TAG = "GPIO";
     static uint32_t counter = 0;
     ++counter;
     ESP_LOGI(TAG, "Button 1 pressed %d times", counter);
@@ -148,7 +146,6 @@ void button_1_cb(void)
 
 void button_2_cb(void)
 {
-    static const char *TAG = "GPIO";
     static uint32_t counter = 0;
     ++counter;
     ESP_LOGI(TAG, "Button 2 pressed %d times", counter);
@@ -158,7 +155,6 @@ void button_2_cb(void)
 
 void button_3_cb(void)
 {
-    static const char *TAG = "GPIO";
     static uint32_t counter = 0;
     ++counter;
     ESP_LOGI(TAG, "Button 3 pressed %d times", counter);

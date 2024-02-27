@@ -3,282 +3,17 @@
 #include "timestamp.h"
 #include "esp32-gpio.h"
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+static char index_html_buffer[20480];
+
 /* HTTP server */
+static const char *TAG = "HTTP_SERVER";
 
 static esp_err_t http_server_get_root_handler(httpd_req_t *req)
 {
-    static const char *TAG = "HTTP_SERVER";
-    const char *response = "<!DOCTYPE html>\n"
-                           "<html lang=\"en\">\n"
-                           "<head>\n"
-                           "    <meta charset=\"UTF-8\">\n"
-                           "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
-                           "    <title>ESP32 WebServer</title>\n"
-                           "    <div id=\"top\">\n"
-                           "        <img class=\"logo\" src=\"https://www.sp.senai.br/images/senai.svg\" alt=\"logo\">\n"
-                           "        <h1>ESP32 WebServer application</h1>\n"
-                           "        <h>WebServer aplication using ESP32 for remotely control and monitoring sensors at field</h>\n"
-                           "        <hr>\n"
-                           "    </div>\n"
-                           "    <!-- Add icon library -->\n"
-                           "    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css\">\n"
-                           "    <link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\">\n"
-                           "    <style>\n"
-                           "        .logo {\n"
-                           "            width: 100%;\n"
-                           "            height: 100%;\n"
-                           "            object-fit: cover; /* Ensure the entire area is covered */\n"
-                           "        }\n"
-                           "        .esp32 {\n"
-                           "            width: 100%;\n"
-                           "            height: 100%;\n"
-                           "            object-fit: cover; /* Ensure the entire area is covered */\n"
-                           "        }\n"
-                           "        .led{\n"
-                           "            position: relative;\n"
-                           "            display: inline-grid;\n"
-                           "            margin: 20px 10px;\n"
-                           "            padding: 24px;\n"
-                           "\n"
-                           "            border: none;\n"
-                           "            cursor: pointer;\n"
-                           "            text-decoration: none;\n"
-                           "            color: #333;\n"
-                           "            background-color: #ecf0f1;\n"
-                           "            transition: background-color .3s;\n"
-                           "        }\n"
-                           "        .btn {\n"
-                           "            position: relative;\n"
-                           "            display: inline-grid;\n"
-                           "            margin: 20px 10px;\n"
-                           "            padding: 48px;\n"
-                           "\n"
-                           "            overflow: hidden;\n"
-                           "            cursor: pointer;\n"
-                           "            border: none;\n"
-                           "            border-radius: 2px;\n"
-                           "\n"
-                           "            box-shadow: 0 1px 4px rgba(0, 0, 0, .6);\n"
-                           "\n"
-                           "            background-color: #2ecc71;\n"
-                           "            color: #ecf0f1;\n"
-                           "\n"
-                           "            transition: background-color .3s;\n"
-                           "        }\n"
-                           "        .btn:hover {\n"
-                           "            background-color: #27ae60;\n"
-                           "        }\n"
-                           "        .btn > * {\n"
-                           "            position: relative;\n"
-                           "        }\n"
-                           "\n"
-                           "        .btn span {\n"
-                           "            display: inline-grid;\n"
-                           "            padding: 12px 24px;\n"
-                           "        }\n"
-                           "        .btn:before {\n"
-                           "            content: \"\";\n"
-                           "            position: relative;\n"
-                           "            top: 50%;\n"
-                           "            left: 50%;\n"
-                           "            display: inline-grid;\n"
-                           "            width: 0;\n"
-                           "            padding-top: 0;\n"
-                           "            border-radius: 100%;\n"
-                           "            background-color: rgba(236, 240, 241, .3);\n"
-                           "            -webkit-transform: translate(-50%, -50%);\n"
-                           "            -moz-transform: translate(-50%, -50%);\n"
-                           "            -ms-transform: translate(-50%, -50%);\n"
-                           "            -o-transform: translate(-50%, -50%);\n"
-                           "            transform: translate(-50%, -50%);\n"
-                           "        }\n"
-                           "        html {\n"
-                           "            position: relative;\n"
-                           "            height: 100%;\n"
-                           "        }\n"
-                           "        h2 {\n"
-                           "            font-weight: normal;\n"
-                           "        }\n"
-                           "        body {\n"
-                           "            position: relative;\n"
-                           "            top: 0%;\n"
-                           "            left: 0%;\n"
-                           "            /*-webkit-transform: translate(-50%, -50%);*/\n"
-                           "            /*-moz-transform: translate(-50%, -50%);*/\n"
-                           "            /*-ms-transform: translate(-50%, -50%);*/\n"
-                           "            /*-o-transform: translate(-50%, -50%);*/\n"
-                           "            /*transform: translate(-50%, -50%);*/\n"
-                           "            background-color: #ecf0f1;\n"
-                           "            color: #34495e;\n"
-                           "            font-family: Trebuchet, Arial, sans-serif;\n"
-                           "            text-align: center;\n"
-                           "        }\n"
-                           "        .success {background-color: #04AA6D;} /* Green */\n"
-                           "        .success:hover {background-color: #46a049;}\n"
-                           "        .info {background-color: #2196F3;} /* Blue */\n"
-                           "        .info:hover {background: #0b7dda;}\n"
-                           "        .warning {background-color: #ff9800;} /* Orange */\n"
-                           "        .warning:hover {background: #e68a00;}\n"
-                           "        .danger {background-color: #f44336;} /* Red */\n"
-                           "        .danger:hover {background: #da190b;}\n"
-                           "        .default {background-color: #e7e7e7; color: black;} /* Gray */\n"
-                           "        .default:hover {background: #ddd;}\n"
-                           "        .material-icons {\n"
-                           "            vertical-align: middle;\n"
-                           "        }\n"
-                           "    </style>\n"
-                           "</head>\n"
-                           "<body>\n"
-                           "<!--<img class=\"esp32\" src=\"https://docs.espressif.com/projects/esp-idf/en/stable/esp32/_images/esp32-devkitC-v4-pinout.png\" alt=\"esp32\">-->\n"
-                           "<!--<img class=\"esp32\" src=\"https://www.espressif.com/sites/default/files/modules/ESP32-WROOM-32E%20L_0.png\" alt=\"esp32\">-->\n"
-                           "<a href=\"https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html\">\n"
-                           "    <img class=\"esp32\" src=\"https://docs.espressif.com/projects/esp-idf/en/stable/esp32/_images/esp32-devkitC-v4-pinout.png\" alt=\"ESP32 Devkit-C Pinout\">\n"
-                           "</a>\n"
-                           "<hr>\n"
-                           "<div id=\"gpios\" class=\"gpios\">\n"
-                           "    <h2>GPIO</a></h2>\n"
-                           "    <p>Push buttons [ON/OFF]</p>\n"
-                           "    <div class=\"buttons-container\">\n"
-                           "        <button id=\"btn0\" class=\"btn\" type=\"button\">BTN0<br>OFF</button>\n"
-                           "        <button id=\"btn1\" class=\"btn\" type=\"button\">BTN1<br>OFF</button>\n"
-                           "        <button id=\"btn2\" class=\"btn\" type=\"button\">BTN2<br>OFF</button>\n"
-                           "        <button id=\"btn3\" class=\"btn\" type=\"button\">BTN3<br>OFF</button>\n"
-                           "        <hr>\n"
-                           "    </div>\n"
-                           "    <div class=\"leds-container\">\n"
-                           "    <p>LEDs</p>\n"
-                           "        <button class=\"led\">LED0\n"
-                           "            <span id=\"led0\" class=\"material-icons\" style=\"font-size: 36px\">radio_button_unchecked</span>\n"
-                           "        </button>\n"
-                           "        <button class=\"led\">LED1\n"
-                           "            <span id=\"led1\" class=\"material-icons\" style=\"font-size: 36px\">radio_button_unchecked</span>\n"
-                           "        </button>\n"
-                           "    </div>\n"
-                           "</div>\n"
-                           "    <hr>\n"
-                           "<div id=\"adc_sensors\" class=\"adc_sensors\">\n"
-                           "    <h2>Analog sensor</h2>\n"
-                           "    <p>Analog input sensor [0-5V]: <b id=\"adc_value\">100.0%</b></p>\n"
-                           "    <hr>\n"
-                           "</div>\n"
-                           "<div id=\"i2c\" class=\"i2c\">\n"
-                           "    <h2>MPU6050 accel/gyro module</h2>\n"
-                           "    <p>MPU6050 module as I2C communication example</p>\n"
-                           "    <div id=\"accel\" >\n"
-                           "        <p>axis_x : <b id=\"accel_x\">12.34</b></p>\n"
-                           "        <p>axis_y : <b id=\"accel_y\">12.34</b></p>\n"
-                           "        <p>axis_z : <b id=\"accel_z\">12.34</b></p>\n"
-                           "    </div>\n"
-                           "    <br>\n"
-                           "    <div id=\"gyro\">\n"
-                           "        <p>axis_x : <b id=\"gyro_x\">12.34</b></p>\n"
-                           "        <p>axis_y : <b id=\"gyro_y\">12.34</b></p>\n"
-                           "        <p>axis_z : <b id=\"gyro_z\">12.34</b></p>\n"
-                           "    </div>\n"
-                           "    <hr>\n"
-                           "</div>\n"
-                           "<footer>\n"
-                           "    <a href=\"#top\">HOME</a>\n"
-                           "    <a href=\"#gpios\">GPIOs</a>\n"
-                           "    <a href=\"#adc_sensors\">ADC</a>\n"
-                           "    <a href=\"#i2c\">MPU6050</a>\n"
-                           "</footer>\n"
-                           "<script>\n"
-                           "    // WebSocket connection\n"
-                           "    var gateway = `ws://${window.location.hostname}/ws`;\n"
-                           "    var websocket;\n"
-                           "    window.addEventListener('load', onLoad);\n"
-                           "    function onLoad(event) {\n"
-                           "        initWebSocket();\n"
-                           "        initButton();\n"
-                           "    }\n"
-                           "    function initWebSocket() {\n"
-                           "        console.log('Trying to open a WebSocket connection...');\n"
-                           "        websocket = new WebSocket(gateway);\n"
-                           "        websocket.onopen = onOpen;\n"
-                           "        websocket.onclose = onClose;\n"
-                           "        websocket.onmessage = onMessage; // <-- add this line\n"
-                           "    }\n"
-                           "    function onOpen(event) {\n"
-                           "        console.log('Connection opened');\n"
-                           "    }\n"
-                           "    function onClose(event) {\n"
-                           "        console.log('Connection closed');\n"
-                           "        setTimeout(initWebSocket, 2000);\n"
-                           "    }\n"
-                           "    function onMessage(event){\n"
-                           "        console.log(\"data received\");\n"
-                           "        const data = JSON.parse(event.data);\n"
-                           "        console.log(\"led0: \" + data[\"esp32-webserver\"].leds[0].value);\n"
-                           "        var id = 0;\n"
-                           "        if(document.getElementById(\"led\"+id).textContent === 'radio_button_checked' && data[\"esp32-webserver\"].leds[id].value === false){\n"
-                           "            document.getElementById(\"led\"+id).textContent = 'radio_button_unchecked';\n"
-                           "        }\n"
-                           "        else if(document.getElementById(\"led\"+id).textContent === 'radio_button_unchecked' && data[\"esp32-webserver\"].leds[id].value === true){\n"
-                           "            document.getElementById(\"led\"+id).textContent = 'radio_button_checked';\n"
-                           "        }\n"
-                           "        console.log(\"led1: \" + data[\"esp32-webserver\"].leds[1].value);\n"
-                           "        var id = 1;\n"
-                           "        if(document.getElementById(\"led\"+id).textContent === 'radio_button_checked' && data[\"esp32-webserver\"].leds[id].value === false){\n"
-                           "            document.getElementById(\"led\"+id).textContent = 'radio_button_unchecked';\n"
-                           "        }\n"
-                           "        else if(document.getElementById(\"led\"+id).textContent === 'radio_button_unchecked' && data[\"esp32-webserver\"].leds[id].value === true){\n"
-                           "            document.getElementById(\"led\"+id).textContent = 'radio_button_checked';\n"
-                           "        }\n"
-                           "        console.log(\"btn0: \" + data[\"esp32-webserver\"].push_buttons[0].value);\n"
-                           "        document.getElementById(\"btn0\").innerHTML = data[\"esp32-webserver\"].push_buttons[0].value ? 'BTN0<br>ON' : 'BTN0<br>OFF';\n"
-                           "        console.log(\"btn1: \" + data[\"esp32-webserver\"].push_buttons[1].value);\n"
-                           "        document.getElementById(\"btn1\").innerHTML = data[\"esp32-webserver\"].push_buttons[1].value ? 'BTN1<br>ON' : 'BTN1<br>OFF';\n"
-                           "        console.log(\"btn2: \" + data[\"esp32-webserver\"].push_buttons[2].value);\n"
-                           "        document.getElementById(\"btn2\").innerHTML = data[\"esp32-webserver\"].push_buttons[2].value ? 'BTN2<br>ON' : 'BTN2<br>OFF';\n"
-                           "        console.log(\"btn3: \" + data[\"esp32-webserver\"].push_buttons[3].value);\n"
-                           "        document.getElementById(\"btn3\").innerHTML = data[\"esp32-webserver\"].push_buttons[3].value ? 'BTN3<br>ON' : 'BTN3<br>OFF';\n"
-                           "        console.log(data[\"esp32-webserver\"].adc_sensors[0].value);\n"
-                           "        document.getElementById(\"adc_value\").innerHTML = parseFloat(data[\"esp32-webserver\"].adc_sensors[0].value).toFixed(2);\n"
-                           "        console.log(\"mpu6050.accel.x: \" + data[\"esp32-webserver\"].mpu6050.accel.x);\n"
-                           "        document.getElementById(\"accel_x\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.accel.x).toFixed(2);\n"
-                           "        console.log(\"mpu6050.accel.y: \" + data[\"esp32-webserver\"].mpu6050.accel.y);\n"
-                           "        document.getElementById(\"accel_y\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.accel.y).toFixed(2);\n"
-                           "        console.log(\"mpu6050.accel.z: \" + data[\"esp32-webserver\"].mpu6050.accel.z);\n"
-                           "        document.getElementById(\"accel_z\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.accel.z).toFixed(2);\n"
-                           "        console.log(\"mpu6050.gyro.x: \" + data[\"esp32-webserver\"].mpu6050.gyro.x);\n"
-                           "        document.getElementById(\"gyro_x\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.gyro.x).toFixed(2);\n"
-                           "        console.log(\"mpu6050.gyro.y: \" + data[\"esp32-webserver\"].mpu6050.gyro.y);\n"
-                           "        document.getElementById(\"gyro_y\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.gyro.y).toFixed(2);\n"
-                           "        console.log(\"mpu6050.gyro.z: \" + data[\"esp32-webserver\"].mpu6050.gyro.z);\n"
-                           "        document.getElementById(\"gyro_z\").innerHTML = parseFloat(data[\"esp32-webserver\"].mpu6050.gyro.z).toFixed(2);\n"
-                           "    }\n"
-                           "    setInterval(()=>{websocket.send(\"/ws/data\") },1000)\n"
-                           "    function initButton(){\n"
-                           "        document.getElementById('btn0').addEventListener('click', toggle);\n"
-                           "        document.getElementById('btn1').addEventListener('click', toggle);\n"
-                           "        document.getElementById('btn2').addEventListener('click', toggle);\n"
-                           "        document.getElementById('btn3').addEventListener('click', toggle);\n"
-                           "        document.getElementById('led0').addEventListener('click', toggle);\n"
-                           "        document.getElementById('led1').addEventListener('click', toggle);\n"
-                           "    }\n"
-                           "    function toggle(msg){\n"
-                           "        websocket.send(msg.target.id);\n"
-                           "        console.log(msg.target.id);\n"
-                           "    }\n"
-                           "    function toggleLED(msg){\n"
-                           "        //document.getElementById(msg.target.id).textContent = 'radio_button_checked';\n"
-                           "        var radioIcon = document.getElementById(msg.target.id).textContent;\n"
-                           "        if(radioIcon === 'radio_button_checked'){\n"
-                           "            document.getElementById(msg.target.id).textContent = 'radio_button_unchecked';\n"
-                           "        }\n"
-                           "        else{\n"
-                           "            document.getElementById(msg.target.id).textContent = 'radio_button_checked';\n"
-                           "        }\n"
-                           "        websocket.send(msg.target.id);\n"
-                           "        console.log(msg.target.id);\n"
-                           "    }\n"
-                           "</script>\n"
-                           "</body>\n"
-                           "</html>\n"
-                           "";
+//    const char *response = index_html_buffer;
 
-    esp_err_t error = httpd_resp_send(req, response, strlen(response));
+    esp_err_t error = httpd_resp_send(req, index_html_buffer, strlen(index_html_buffer));
 
     if (ESP_OK != error) {
         ESP_LOGI(TAG, "Erro %d while sending response", error);
@@ -290,7 +25,6 @@ static esp_err_t http_server_get_root_handler(httpd_req_t *req)
 // The asynchronous response
 static void generate_async_resp(void *arg)
 {
-    static const char *TAG = "HTTP_SERVER";
     // Data format to be sent from the server as a response to the client
     char http_string[250];
 
@@ -316,7 +50,6 @@ static void generate_async_resp(void *arg)
 
 static esp_err_t http_server_async_get_handler(httpd_req_t *req)
 {
-    static const char *TAG = "HTTP_SERVER";
     struct async_resp_arg *resp_arg = malloc(sizeof(struct async_resp_arg));
     resp_arg->hd = req->handle;
     resp_arg->fd = httpd_req_to_sockfd(req);
@@ -399,7 +132,6 @@ static esp_err_t trigger_async_send(httpd_handle_t handle, httpd_req_t *req)
 
 static esp_err_t handle_ws_req(httpd_req_t *req)
 {
-    static const char *TAG = "HTTP_SERVER";
     if (req->method == HTTP_GET) {
         ESP_LOGI(TAG, "Handshake done, the new connection was opened");
         return ESP_OK;
@@ -444,12 +176,13 @@ static esp_err_t handle_ws_req(httpd_req_t *req)
 
 httpd_handle_t http_server_start(void)
 {
-    static const char *TAG = "HTTP_SERVER";
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.lru_purge_enable = true;
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
 
+    ESP_LOGI(TAG, "Reading index.html");
+    init_web_page_buffer();
     // Set URI handlers
     ESP_LOGI(TAG, "Registering URI handlers");
     static const httpd_uri_t uri_root = {
@@ -485,7 +218,6 @@ httpd_handle_t http_server_start(void)
 
 void http_server_stop(httpd_handle_t *server)
 {
-    static const char *TAG = "HTTP_SERVER";
     // Stop the httpd server
     httpd_stop(&server);
     ESP_LOGI(TAG, "Server stop!");
@@ -493,7 +225,6 @@ void http_server_stop(httpd_handle_t *server)
 
 static void http_server_connect_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
-    static const char *TAG = "HTTP_SERVER";
     httpd_handle_t *server = (httpd_handle_t *) arg;
     if (NULL == *server) {
         ESP_LOGI(TAG, "Starting webserver");
@@ -503,7 +234,6 @@ static void http_server_connect_handler(void *arg, esp_event_base_t event_base, 
 
 static void http_server_disconnect_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
-    static const char *TAG = "HTTP_SERVER";
     httpd_handle_t *server = (httpd_handle_t *) arg;
     if (*server) {
         ESP_LOGI(TAG, "Stopping webserver");
@@ -514,7 +244,6 @@ static void http_server_disconnect_handler(void *arg, esp_event_base_t event_bas
 
 static esp_err_t http_server_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
 {
-    static const char *TAG = "HTTP_SERVER";
     /* For any other URI send 404 and close socket */
     httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "404 URI not found");
     ESP_LOGI(TAG, "404 URI not found");
@@ -543,4 +272,94 @@ static esp_err_t treat_payload(httpd_ws_frame_t *ws_pkt)
     }
 
     return ESP_OK;
+}
+
+void init_web_page_buffer(void)
+{
+    ESP_LOGI(TAG, "Initializing SPIFFS");
+
+    const char *index_html_path = "/spiffs/index.html";
+
+    esp_vfs_spiffs_conf_t conf = {
+        .base_path = "/spiffs",
+        .partition_label = NULL,
+        .max_files = 5,
+        .format_if_mount_failed = true
+    };
+
+    // Use settings defined above to initialize and mount SPIFFS filesystem.
+    // Note: esp_vfs_spiffs_register is an all-in-one convenience function.
+    esp_err_t ret = esp_vfs_spiffs_register(&conf);
+
+    if (ret != ESP_OK) {
+        if (ret == ESP_FAIL) {
+            ESP_LOGE(TAG, "Failed to mount or format filesystem");
+        }
+        else if (ret == ESP_ERR_NOT_FOUND) {
+            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
+        }
+        else {
+            ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+        }
+        return;
+    }
+
+    ESP_LOGI(TAG, "Performing SPIFFS_check().");
+    ret = esp_spiffs_check(conf.partition_label);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "SPIFFS_check() failed (%s)", esp_err_to_name(ret));
+        return;
+    }
+    else {
+        ESP_LOGI(TAG, "SPIFFS_check() successful");
+    }
+
+    size_t total = 0, used = 0;
+    ret = esp_spiffs_info(conf.partition_label, &total, &used);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to get SPIFFS partition information (%s). Formatting...", esp_err_to_name(ret));
+        esp_spiffs_format(conf.partition_label);
+        return;
+    }
+    else {
+        ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
+    }
+
+    // Check consistency of reported partiton size info.
+    if (used > total) {
+        ESP_LOGW(TAG, "Number of used bytes cannot be larger than total. Performing SPIFFS_check().");
+        ret = esp_spiffs_check(conf.partition_label);
+        // Could be also used to mend broken files, to clean unreferenced pages, etc.
+        // More info at https://github.com/pellepl/spiffs/wiki/FAQ#powerlosses-contd-when-should-i-run-spiffs_check
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "SPIFFS_check() failed (%s)", esp_err_to_name(ret));
+            return;
+        }
+        else {
+            ESP_LOGI(TAG, "SPIFFS_check() successful");
+        }
+    }
+
+    // Open renamed file for reading
+    ESP_LOGI(TAG, "Reading file");
+
+    FILE *file = fopen(index_html_path, "r");
+    if (file == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for reading");
+        return;
+    }
+    memset((void *) index_html_buffer, 0, sizeof(index_html_buffer));
+    struct stat st;
+    if (stat(index_html_path, &st)) {
+        ESP_LOGE(TAG, "index.html not found");
+        return;
+    }
+
+    if (fread(index_html_buffer, st.st_size, 1, file) == 0) {
+        ESP_LOGE(TAG, "fread failed");
+    }
+    fclose(file);
+    // All done, unmount partition and disable SPIFFS
+//    esp_vfs_spiffs_unregister(conf.partition_label);
+    ESP_LOGI(TAG, "SPIFFS unmounted");
 }

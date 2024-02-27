@@ -12,19 +12,12 @@
 #include <esp_netif_types.h>
 #include <esp_wifi_types.h>
 #include <esp_http_server.h>
-/* Lwip */
-#include <lwip/err.h>
-#include <lwip/sys.h>
-#include <lwip/sockets.h>
-#include <lwip/api.h>
-#include <lwip/netdb.h>
-#include <lwip/ip4_addr.h>
 
+static const char *TAG = "Wifi";
 /* Wifi */
 /** Configure and start wifi connection **/
 void wifi_configure(wifi_mode_t wifi_mode, wifi_config_t *config)
 {
-    static const char *TAG = "Wifi";
     ESP_LOGI(TAG, "wifi_configure");
     wifi_event_group = xEventGroupCreate();
     ESP_ERROR_CHECK(esp_netif_init());
@@ -77,7 +70,6 @@ void wifi_configure(wifi_mode_t wifi_mode, wifi_config_t *config)
 
 void wifi_access_point_mode_configure(wifi_config_t *config)
 {
-    static const char *TAG = "Wifi";
     ESP_LOGI(TAG, "wifi_access_point_mode_configure");
     esp_netif_create_default_wifi_ap();
 
@@ -96,7 +88,6 @@ void wifi_access_point_mode_configure(wifi_config_t *config)
 
 void wifi_station_mode_configure(wifi_config_t *config)
 {
-    static const char *TAG = "Wifi";
     ESP_LOGI(TAG, "wifi_station_mode_configure");
     esp_netif_create_default_wifi_sta();
 
@@ -111,7 +102,6 @@ void wifi_station_mode_configure(wifi_config_t *config)
 
 void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
-    static const char *TAG = "Wifi";
     ESP_LOGI(TAG, "wifi_event_handler");
 
     switch (event_id) {
@@ -180,7 +170,6 @@ void wifi_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id
 
 void wifi_ip_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
-    static const char *TAG = "Wifi";
     ESP_LOGI(TAG, "wifi_ip_event_handler");
     switch (event_id) {
         case IP_EVENT_STA_GOT_IP:               /* station got IP from connected AP */

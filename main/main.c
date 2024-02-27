@@ -13,9 +13,10 @@
 #include "esp32-wifi.h"
 #include "payload.h"
 
+static const char *TAG = "MAIN";
+
 void app_main(void)
 {
-    static const char *TAG = "MAIN";
     ESP_LOGI(TAG, "Start");
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -23,6 +24,7 @@ void app_main(void)
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
+
     /** Configure wifi mode and wait until connection is ESTABLISH**/
     wifi_configure(WIFI_MODE_STA, &wifi_config);
     /** Synchronize internal clock **/

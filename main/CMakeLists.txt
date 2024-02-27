@@ -15,3 +15,5 @@ idf_component_register(
         INCLUDE_DIRS "."
         INCLUDE_DIRS "./include"
 )
+
+spiffs_create_partition_image(storage ../data FLASH_IN_PROJECT)

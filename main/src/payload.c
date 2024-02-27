@@ -3,6 +3,8 @@
 #include <esp_log.h>
 #include "cJSON.h"
 
+static const char *TAG = "Payload";
+
 extern gpio_t leds[2];
 
 extern gpio_t push_buttons[4];
@@ -15,7 +17,6 @@ extern volatile mpu6050_rotation_float_t gyroscope;
 
 char *create_json_object(timestamp_t *timestamp, char *strftime_buf)
 {
-    static const char *TAG = "Payload";
     cJSON *root = cJSON_CreateObject();
     if (!root) {
         ESP_LOGE(TAG, "Error creating JSON object.");
@@ -107,8 +108,6 @@ char *create_json_object(timestamp_t *timestamp, char *strftime_buf)
 
 void xPayload(void *arg)
 {
-    static const char *TAG = "Payload";
-
     initialize_sntp();
 
     for (;;) {

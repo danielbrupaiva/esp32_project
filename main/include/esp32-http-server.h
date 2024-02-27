@@ -5,7 +5,8 @@
 #include <esp_event.h>
 #include <esp_event_loop.h>
 #include <freertos/event_groups.h>
-#include <esp_http_server.h>
+#include <esp_spiffs.h>
+#include "esp_http_server.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,7 +30,7 @@ static esp_err_t http_server_async_get_handler(httpd_req_t *req);
 static esp_err_t http_server_404_error_handler(httpd_req_t *req, httpd_err_code_t err);
 
 static esp_err_t treat_payload(httpd_ws_frame_t *ws_pkt);
-
+void init_web_page_buffer(void);
 #ifdef __cplusplus
 }
 #endif

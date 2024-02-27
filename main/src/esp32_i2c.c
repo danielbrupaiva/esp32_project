@@ -3,6 +3,8 @@
 #include <esp_log.h>
 #include "mpu6050.h"
 
+static const char *TAG = "MPU6050";
+
 extern uint32_t acquisition_time_ms;
 
 volatile mpu6050_acceleration_float_t acceleration;
@@ -11,7 +13,6 @@ volatile mpu6050_rotation_float_t gyroscope;
 
 void configure_i2c(void)
 {
-    static const char *TAG = "MPU6050";
     i2c_config_t conf = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = I2C_SDA, // select GPIO specific to your project
@@ -26,8 +27,6 @@ void configure_i2c(void)
 }
 void configure_mpu6050(void)
 {
-    static const char *TAG = "MPU6050";
-
     configure_i2c();
 //    mpu6050_reset();
 //    ESP_LOGI(TAG, "reset successfully");
@@ -41,8 +40,6 @@ void configure_mpu6050(void)
 }
 mpu6050_acceleration_float_t get_mpu6050_accel_data(void)
 {
-    static const char *TAG = "MPU6050";
-
     mpu6050_acceleration_t raw_acc_data = {0};
     float acc_scale_factor = 16384.0;
     mpu6050_get_acceleration(&raw_acc_data);
@@ -57,8 +54,6 @@ mpu6050_acceleration_float_t get_mpu6050_accel_data(void)
 
 mpu6050_rotation_float_t get_mpu6050_gyro_data(void)
 {
-    static const char *TAG = "MPU6050";
-
     mpu6050_rotation_t raw_gyro_data = {0};
     float gyro_scale_factor = 131.0;
     mpu6050_get_rotation(&raw_gyro_data);
