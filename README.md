@@ -2,7 +2,7 @@
 
 ## WebServer aplication using ESP32 for remotely control and monitoring sensors at field
 
-![esp32webserver.png](data/esp32webserver.png)
+![esp32webserver.png](img/esp32webserver.png)
 
 ### Setup:
 
@@ -31,7 +31,7 @@
 
 ## ESP-IDF v4.4
 
-![esp-idf.png](data/esp-idf.png)
+![esp-idf.png](img/esp-idf.png)
 
 Installation according Espressif get-start documentation
 
@@ -76,4 +76,4 @@ Installation according Espressif get-start documentation
 
 ### Dashboard
 
-![img_1.png](data/esp32web.png)
+![img_1.png](img/esp32web.png)
